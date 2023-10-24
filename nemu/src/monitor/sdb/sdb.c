@@ -78,7 +78,7 @@ static int cmd_si(char *args) {
 		bool flag = stringToInt(arg,&N);
 		if (flag) {
 			//run main things
-			printf("running si successfully\n");
+			printf("running si successfully N=%d\n", N);
 		}
 		else { printf("invalid argument '%s'\n", arg);}
 	}

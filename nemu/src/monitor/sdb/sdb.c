@@ -56,7 +56,7 @@ static int cmd_info(char *args) {
 
 static bool stringToInt( char * str, int * N_ptr ){
 	*N_ptr = 0;
-	while(str != 0) {
+	while(*str != 0) {
 		if( (isdigit(*str)) ) {
 			*N_ptr *= 10;
 			*N_ptr += (*str++) - '0';

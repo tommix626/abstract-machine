@@ -71,7 +71,7 @@ static int cmd_si( char *args ) {
 	int N=0;
 	if (arg == NULL) {
     /* no argument given */
-		N = 1;
+		cpu_exec(1);
   }
   else {
 		/* convert arg into int */

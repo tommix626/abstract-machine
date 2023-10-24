@@ -50,7 +50,22 @@ static int cmd_c(char *args) {
 
 
 static int cmd_info(char *args) {
-  return -1;
+  char *arg = strtok(NULL, " ");
+  // int i;
+
+  if (arg == NULL) {
+    /* no argument given */
+    printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
+    return 0;
+  }
+  else if (strcmp(arg,"r")==0){
+    isa_reg_display();
+  }
+  else if (strcmp(arg,"w")==0){
+    
+  }
+    printf("Unknown command '%s'\n", arg);
+  return 0;
 }
 
 
@@ -78,7 +93,7 @@ static int cmd_si( char *args ) {
 		bool flag = stringToInt(arg,&N);
 		if (flag) {
       cpu_exec(N); //run main things
-			printf("running si successfully N=%d\n", N);
+			// printf("running si successfully N=%d\n", N);
 		}
 		else { printf("invalid argument '%s'\n", arg);}
 	}
@@ -91,6 +106,70 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+// static int cmd_x(char *args) {
+//   char *arg = strtok(NULL, " ");
+//   int i;
+
+//   if (arg == NULL) {
+//     /* no argument given */
+//     printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
+//     return 0;
+//   }
+//   else {
+    
+//   }
+//     printf("Unknown command '%s'\n", arg);
+//   return 0;
+// }
+
+// static int cmd_p(char *args) {
+//   char *arg = strtok(NULL, " ");
+//   int i;
+
+//   if (arg == NULL) {
+//     /* no argument given */
+//     printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
+//     return 0;
+//   }
+//   else {
+    
+//   }
+//     printf("Unknown command '%s'\n", arg);
+//   return 0;
+// }
+
+// static int cmd_w(char *args) {
+//   char *arg = strtok(NULL, " ");
+//   int i;
+
+//   if (arg == NULL) {
+//     /* no argument given */
+//     printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
+//     return 0;
+//   }
+//   else {
+    
+//   }
+//     printf("Unknown command '%s'\n", arg);
+//   return 0;
+// }
+
+// static int cmd_d(char *args) {
+//   char *arg = strtok(NULL, " ");
+//   int i;
+
+//   if (arg == NULL) {
+//     /* no argument given */
+//     printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
+//     return 0;
+//   }
+//   else {
+    
+//   }
+//     printf("Unknown command '%s'\n", arg);
+//   return 0;
+// }
+
 static struct {
   const char *name;
   const char *description;
@@ -102,6 +181,10 @@ static struct {
   /* TODO: Add more commands */
   { "si", "[N] Step through N times", cmd_si },
   { "info","[r/w] print information", cmd_info },
+  // { "x","scan the memory", cmd_x },
+  // { "p","print", cmd_p },
+  // { "w","set watchpoint", cmd_w },
+  // { "d","delete watchpoint", cmd_d },
 
 };
 
@@ -150,8 +233,8 @@ void sdb_mainloop() {
     /* treat the remaining string as the arguments,
      * which may need further parsing
      */
-    char *args = cmd + strlen(cmd) + 1;
-    if (args >= str_end) {
+    char *args = cmd + strlen(cmd) + 1; //skip the command and get the args.
+    if (args >= str_end) { // if skipping the cmd exceeds the end of the str addr, then no args.
       args = NULL;
     }
 
@@ -160,6 +243,7 @@ void sdb_mainloop() {
     sdl_clear_event_queue();
 #endif
 
+    /*go through command in the `cmd_table` and try to match*/
     int i;
     for (i = 0; i < NR_CMD; i ++) {
       if (strcmp(cmd, cmd_table[i].name) == 0) {
@@ -167,7 +251,7 @@ void sdb_mainloop() {
         break;
       }
     }
-
+    // if went through all the command. (exiting the loop by violating the loop constriant instead of using the break statement)
     if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
   }
 }

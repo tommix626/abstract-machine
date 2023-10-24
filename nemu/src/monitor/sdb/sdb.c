@@ -48,6 +48,43 @@ static int cmd_c(char *args) {
 }
 
 
+
+static int cmd_info(char *args) {
+  return -1;
+}
+
+
+static bool stringToInt( char * str, int * N_ptr ){
+	*N_ptr = 0;
+	while(str != 0) {
+		if( (isdigit(*str)) ) {
+			*N_ptr *= 10;
+			*N_ptr += (*str++) - '0';
+		}
+		else { return false;}
+	}
+	return true;
+}
+
+static int cmd_si(char *args) {
+	char *arg = strtok(NULL, " ");
+	int N=0;
+	if (arg == NULL) {
+    /* no argument given */
+		N = 1;
+  }
+  else {
+		/* convert arg into int */
+		bool flag = stringToInt(arg,&N);
+		if (flag) {
+			//run main things
+			printf("running si successfully\n");
+		}
+		else { printf("invalid argument '%s'\n", arg);}
+	}
+	return 0;
+}
+
 static int cmd_q(char *args) {
   return -1;
 }
@@ -62,8 +99,9 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
   /* TODO: Add more commands */
+  { "si", "[N] Step through N times", cmd_si },
+  { "info","[r/w] print information", cmd_info },
 
 };
 
@@ -87,8 +125,8 @@ static int cmd_help(char *args) {
         return 0;
       }
     }
-    printf("Unknown command '%s'\n", arg);
   }
+    printf("Unknown command '%s'\n", arg);
   return 0;
 }
 

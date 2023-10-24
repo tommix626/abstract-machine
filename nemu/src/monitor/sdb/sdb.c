@@ -66,7 +66,7 @@ static bool stringToInt( char * str, int * N_ptr ){
 	return true;
 }
 
-static int cmd_si(char *args) {
+static int cmd_si( char *args ) {
 	char *arg = strtok(NULL, " ");
 	int N=0;
 	if (arg == NULL) {
@@ -77,7 +77,7 @@ static int cmd_si(char *args) {
 		/* convert arg into int */
 		bool flag = stringToInt(arg,&N);
 		if (flag) {
-			//run main things
+      cpu_exec(N); //run main things
 			printf("running si successfully N=%d\n", N);
 		}
 		else { printf("invalid argument '%s'\n", arg);}

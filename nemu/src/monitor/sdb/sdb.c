@@ -181,7 +181,7 @@ static struct {
   /* TODO: Add more commands */
   { "si", "[N] Step through N times", cmd_si },
   { "info","[r/w] print information", cmd_info },
-  // { "x","scan the memory", cmd_x },
+  // { "x","[N EXPR] scan X memory at the place EXPR", cmd_x },
   // { "p","print", cmd_p },
   // { "w","set watchpoint", cmd_w },
   // { "d","delete watchpoint", cmd_d },

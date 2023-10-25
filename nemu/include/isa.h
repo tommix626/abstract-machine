@@ -21,7 +21,7 @@
 
 // The macro `__GUEST_ISA__` is defined in $(CFLAGS).
 // It will be expanded as "x86" or "mips32" ...
-typedef concat(__GUEST_ISA__, _CPU_state) CPU_state;
+typedef concat(__GUEST_ISA__, _CPU_state) CPU_state; //NOTE: CPU_states expans to a class name for cpu, which contains regs and pc. eg: riscv32_CPU_state
 typedef concat(__GUEST_ISA__, _ISADecodeInfo) ISADecodeInfo;
 
 // monitor
@@ -29,7 +29,7 @@ extern unsigned char isa_logo[];
 void init_isa();
 
 // reg
-extern CPU_state cpu;
+extern CPU_state cpu; //extern meaning cpu is defined elsewhere, so this is like receiving the cpu reference from another file. (nemu/src/cpu/cpu-exec.c:28~)
 void isa_reg_display();
 word_t isa_reg_str2val(const char *name, bool *success);
 

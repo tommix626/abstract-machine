@@ -21,7 +21,7 @@ const char *regs[] = {
   "a4", "a5", "a6", "a7", "t0", "t1", "t2", "t3",
   "t4", "t5", "t6", "t7", "t8", "rs", "fp", "s0",
   "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"
-};
+}; //this stores the name, accessed through 
 
 void isa_reg_display() {
 }

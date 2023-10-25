@@ -59,7 +59,7 @@ static int cmd_info(char *args) {
     return 0;
   }
   else if (strcmp(arg,"r")==0){
-    isa_reg_display();
+    isa_reg_display(); //rax            0x0                 0
   }
   else if (strcmp(arg,"w")==0){
     

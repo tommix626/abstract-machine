@@ -74,10 +74,37 @@ static int cmd_info(char *args) {
   return 0;
 }
 
-//helper method: parse the value of an expression.
-static bool parse_EXPR ( char * str, int * N_ptr ){
-  *N_ptr = 0x80000000;
-  return true;
+// //helper method: parse the value of an expression.
+// static bool parse_EXPR ( char * str, int * N_ptr ){
+  
+//   *N_ptr = 0x80000000;
+//   return true;
+// }
+
+static bool parseHexStringToInt(const char* hexString, int * N_ptr) {
+    // Check if the input string is NULL or empty
+    if (hexString == NULL || hexString[0] == '\0') {
+        fprintf(stderr, "Invalid input: NULL or empty string\n");
+        return false; 
+    }
+
+    // Check if the string starts with "0x" and adjust the pointer accordingly
+    int offset = 0;
+    if (strncmp(hexString, "0x", 2) == 0) {
+        offset = 2;
+    }
+
+    // Use strtol to convert the hex string to an integer
+    char* endptr; // Pointer to the character that ends the conversion
+    long int result = strtol(hexString + offset, &endptr, 16);
+
+    // Check for conversion errors
+    if (*endptr != '\0') {
+        fprintf(stderr, "Invalid input: Not a valid hexadecimal number\n");
+        return false;
+    }
+    *N_ptr = (int)result;
+    return true; // Cast the long integer result to int
 }
 
 //helper method: read an int-like string `str` and change `N_ptr` into int. 
@@ -137,8 +164,13 @@ static int cmd_x(char *args) {
       return 0;
     }
     arg = strtok(NULL, " "); //read next arg: EXPR
+    if (arg == NULL) {
+      /* no second argument given */
+      printf("Missing EXPR argument. usage: x [N EXPR] \n");
+      return 0;
+    }
     int expr_val=0;
-    flag = parse_EXPR(arg, &expr_val);
+    flag = parseHexStringToInt(arg, &expr_val); // TODO:temp apporach only accept hex number.
     paddr_t start_addr = (paddr_t) expr_val; //FIXME: convert int to addr, might be buggy
     printf("x read %d memory starting from %#x\n", scan_len, start_addr);
 

@@ -21,7 +21,8 @@
 
 
 #include <memory/paddr.h>
-#include<common.h> //used for word_t
+// #include<common.h> //used for word_t !already imported in sdb.h
+// #include "expr.c" //used for expr parsing !already imported in sdb.h
 
 static int is_batch_mode = false;
 
@@ -81,31 +82,7 @@ static int cmd_info(char *args) {
 //   return true;
 // }
 
-static bool parseHexStringToInt(const char* hexString, int * N_ptr) {
-    // Check if the input string is NULL or empty
-    if (hexString == NULL || hexString[0] == '\0') {
-        fprintf(stderr, "Invalid input: NULL or empty string\n");
-        return false; 
-    }
 
-    // Check if the string starts with "0x" and adjust the pointer accordingly
-    int offset = 0;
-    if (strncmp(hexString, "0x", 2) == 0) {
-        offset = 2;
-    }
-
-    // Use strtol to convert the hex string to an integer
-    char* endptr; // Pointer to the character that ends the conversion
-    long int result = strtol(hexString + offset, &endptr, 16);
-
-    // Check for conversion errors
-    if (*endptr != '\0') {
-        fprintf(stderr, "Invalid input: Not a valid hexadecimal number\n");
-        return false;
-    }
-    *N_ptr = (int)result;
-    return true; // Cast the long integer result to int
-}
 
 //helper method: read an int-like string `str` and change `N_ptr` into int. 
 //Return `false` if str is invalid int (eg. '23sfef').
@@ -148,6 +125,7 @@ static int cmd_help(char *args);
 
 static int cmd_x(char *args) {
   /*eg: x 10 0x80000000*/
+  int ori_arg_len = strlen(args);
   char *arg = strtok(NULL, " ");
 
   if (arg == NULL) {
@@ -163,14 +141,19 @@ static int cmd_x(char *args) {
       printf("Invalid argument: N not int!\n");
       return 0;
     }
-    arg = strtok(NULL, " "); //read next arg: EXPR
-    if (arg == NULL) {
+    char * arg2 = arg + strlen(arg) + 1; //skip to read next arg: EXPR
+    if (ori_arg_len - strlen(arg) == 0 || *arg2 == '\0' || arg2 == NULL) {
       /* no second argument given */
       printf("Missing EXPR argument. usage: x [N EXPR] \n");
       return 0;
     }
-    int expr_val=0;
-    flag = parseHexStringToInt(arg, &expr_val); // TODO:temp apporach only accept hex number.
+    printf("EXPR = %s\n", arg2);
+    flag = true;
+    word_t expr_val=expr(arg2, &flag);
+    if(!flag) {
+      printf("Invalid EXPR argument.\n");
+      return 0;
+    }
     paddr_t start_addr = (paddr_t) expr_val; //FIXME: convert int to addr, might be buggy
     printf("x read %d memory starting from %#x\n", scan_len, start_addr);
 
@@ -182,53 +165,24 @@ static int cmd_x(char *args) {
   return 0;
 }
 
-// static int cmd_p(char *args) {
-//   char *arg = strtok(NULL, " ");
-//   int i;
+static int cmd_p(char *args) {
+  if (*args == '\0' || args == NULL) {
+    /* no argument given */
+    printf("Missing argument. usage: p [EXPR] \n");
+    return 0;
+  }
 
-//   if (arg == NULL) {
-//     /* no argument given */
-//     printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
-//     return 0;
-//   }
-//   else {
-    
-//   }
-//     printf("Unknown command '%s'\n", arg);
-//   return 0;
-// }
+  printf("EXPR = %s\n", args);
+  bool flag = true;
+  word_t expr_val=expr(args, &flag);
+  if(!flag) {
+    printf("Invalid EXPR argument.\n");
+    return 0;
+  }
+  printf("%d\n",expr_val);
 
-// static int cmd_w(char *args) {
-//   char *arg = strtok(NULL, " ");
-//   int i;
-
-//   if (arg == NULL) {
-//     /* no argument given */
-//     printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
-//     return 0;
-//   }
-//   else {
-    
-//   }
-//     printf("Unknown command '%s'\n", arg);
-//   return 0;
-// }
-
-// static int cmd_d(char *args) {
-//   char *arg = strtok(NULL, " ");
-//   int i;
-
-//   if (arg == NULL) {
-//     /* no argument given */
-//     printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
-//     return 0;
-//   }
-//   else {
-    
-//   }
-//     printf("Unknown command '%s'\n", arg);
-//   return 0;
-// }
+  return 0;
+}
 
 static struct {
   const char *name;
@@ -242,7 +196,7 @@ static struct {
   { "si", "[N] - Step through N times", cmd_si },
   { "info","rw - print information", cmd_info },
   { "x","N EXPR - scan N 4-byte memory starting at the place EXPR", cmd_x },
-  // { "p","print", cmd_p },
+  { "p","EXPR - print expression", cmd_p },
   // { "w","set watchpoint", cmd_w },
   // { "d","delete watchpoint", cmd_d },
 

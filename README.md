@@ -17,3 +17,9 @@ The following subprojects/components are included. Some of them are not fully im
 * [Abstract-Machine](https://github.com/NJU-ProjectN/abstract-machine)
 * [Nanos-lite](https://github.com/NJU-ProjectN/nanos-lite)
 * [Navy-apps](https://github.com/NJU-ProjectN/navy-apps)
+
+# WORK CHANGE LIST
+
+## pa1.1 implement `sdb` (simple debugger) mimicing instruction of `gdb`: 
+- ### support step run (`si [N]`), info register (`info r`), memory scanning (`x N ADDR_EXPR`).
+- ### support EXPR parsing with regex. (Arith Calculator!) Therefore support print command (`p EXPR`)

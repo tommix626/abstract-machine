@@ -19,12 +19,19 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include "sdb.h"
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
-
-  /* TODO: Add more token types */
-
+  TK_NOTYPE = 256,
+  TK_EQ,
+  TK_NUM,       // For numbers
+  TK_HEXNUM,    // For hex numbers
+  TK_PLUS,      // For '+'
+  TK_MINUS,     // For '-'
+  TK_MULTIPLY,  // For '*'
+  TK_DIVIDE,    // For '/'
+  TK_LEFT_PAREN, // For '('
+  TK_RIGHT_PAREN, // For ')'
 };
 
 static struct rule {
@@ -37,8 +44,15 @@ static struct rule {
    */
 
   {" +", TK_NOTYPE},    // spaces
-  {"\\+", '+'},         // plus
+  {"\\+", TK_PLUS},     // plus
   {"==", TK_EQ},        // equal
+  {"[0-9]+", TK_NUM},   // numbers (decimal)
+  {"0[xX][0-9a-fA-F]+", TK_HEXNUM}, //numbers (hex)
+  {"-", TK_MINUS},      // minus
+  {"\\*", TK_MULTIPLY}, // multiply
+  {"/", TK_DIVIDE},     // divide
+  {"\\(", TK_LEFT_PAREN},  // left parenthesis
+  {"\\)", TK_RIGHT_PAREN}, // right parenthesis
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -93,9 +107,20 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-
+        if(substr_len>=32){
+          panic("token buffer overflow");
+        }
+        if (nr_token >= 32) {
+          panic("Too many tokens\n");
+        }
         switch (rules[i].token_type) {
-          default: TODO();
+          case TK_NOTYPE:  break;
+          default: 
+            Token new_token = { .type = rules[i].token_type };
+            tokens[nr_token] = new_token;
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token].str[substr_len] = '\0'; // Important, debugged for so long...
+            nr_token++;
         }
 
         break;
@@ -112,14 +137,174 @@ static bool make_token(char *e) {
 }
 
 
+
+
+static word_t parseHexStringToInt(const char* hexString) {
+    if (hexString == NULL || hexString[0] == '\0') {
+        panic("Invalid input: NULL or empty string\n");
+        return false; 
+    }
+
+    int offset = 0;
+    if (strncmp(hexString, "0x", 2) == 0) {
+        offset = 2;
+    }
+    else {panic("hex number doesn't start with \"0x\"");}
+
+    // Use strtol to convert the hex string to an integer
+    char* endptr;
+    long int result = strtol(hexString + offset, &endptr, 16);
+
+    // Check for conversion errors
+    if (*endptr != '\0') {
+        fprintf(stderr, "Invalid input: Not a valid hexadecimal number\n");
+        return false;
+    }
+    return (word_t)result; // Cast the long integer result to int
+}
+
+int find_main_operator(int p, int q, bool *success) {
+  // Find the operator with the lowest precedence
+  int parentheses_count = 0;
+  int main_operator = -1;
+  int lowest_precedence = 999;
+
+  for (int i = p; i <= q; i++) {
+    if (tokens[i].type == TK_LEFT_PAREN) {
+      parentheses_count++;
+    } else if (tokens[i].type == TK_RIGHT_PAREN) {
+      parentheses_count--;
+    } else if (parentheses_count == 0) {
+      // Only consider operators outside of parentheses
+      if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
+        int precedence = 1;
+        if (precedence <= lowest_precedence) {
+          lowest_precedence = precedence;
+          main_operator = i;
+        }
+      } else if (tokens[i].type == TK_MULTIPLY || tokens[i].type == TK_DIVIDE) {
+        int precedence = 2;
+        if (precedence <= lowest_precedence) {
+          lowest_precedence = precedence;
+          main_operator = i;
+        }
+      } else if (tokens[i].type == TK_EQ) {
+        int precedence = 0;
+        if (precedence <= lowest_precedence) {
+          lowest_precedence = precedence;
+          main_operator = i;
+        }
+      }
+    }
+  }
+
+  if (parentheses_count != 0) {
+    // Unmatched parentheses
+    *success = false;
+    return -1;
+  }
+
+  return main_operator;
+}
+
+bool check_parentheses(int p, int q) {
+  if (tokens[p].type != TK_LEFT_PAREN || tokens[q].type != TK_RIGHT_PAREN) {
+    /* Mismatched parentheses */
+    return false;
+  }
+
+  int balance = 0;
+  for (int i = p; i <= q; i++) {
+    if (tokens[i].type == TK_LEFT_PAREN) {
+      balance++;
+    } else if (tokens[i].type == TK_RIGHT_PAREN) {
+      balance--;
+      if (balance < 0) {
+        /* Unmatched closing parenthesis */
+        return false;
+      }
+    }
+  }
+
+  return (balance == 0);
+}
+
+word_t evaluate_expression(int p, int q, bool *success) {
+  if (*success == false) {
+    return 0;
+  }
+  
+  if (p > q) {
+    *success = false;
+    return 0;
+  }
+  
+  if (p == q) {
+    // Single token in the expression
+    if (tokens[p].type == TK_NUM) {
+      return strtol(tokens[p].str, NULL, 0);
+    }
+    else if (tokens[p].type == TK_HEXNUM) {
+      return parseHexStringToInt(tokens[p].str);
+    }
+    else {
+      *success = false;
+      return 0;
+    }
+  }
+  else if (check_parentheses(p, q) == true) {
+    /* The expression is surrounded by a matched pair of parentheses.
+     * If that is the case, just throw away the parentheses.
+     */
+    return evaluate_expression(p + 1, q - 1, success);
+  }
+  
+  int op = find_main_operator(p, q, success);
+  
+  if (!*success) {
+    return 0;
+  }
+  
+  // Evaluate the left and right sub-expressions
+  word_t val1 = evaluate_expression(p, op - 1, success);
+  word_t val2 = evaluate_expression(op + 1, q, success);
+  
+  if (!*success) {
+    return 0;
+  }
+  
+  // Perform the operation based on the main operator
+  switch (tokens[op].type) {
+    case TK_PLUS:
+      return val1 + val2;
+    case TK_MINUS:
+      return val1 - val2;
+    case TK_MULTIPLY:
+      return val1 * val2;
+    case TK_DIVIDE:
+      if (val2 == 0) { // div by 0
+        *success = false;
+        return 0;
+      }
+      return val1 / val2;
+    case TK_EQ:
+      return val1 == val2;
+    default:
+      // Invalid operator
+      *success = false;
+      return 0;
+  }
+}
+
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
+    printf("make token failed\n");
     return 0;
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+  // TODO();
 
-  return 0;
+   return evaluate_expression(0, nr_token - 1, success);
 }

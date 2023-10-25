@@ -20,4 +20,6 @@
 
 word_t expr(char *e, bool *success);
 
+word_t evaluate_subexpression(int p, int q, bool * success);
+
 #endif

@@ -18,9 +18,11 @@
 
 #include <common.h>
 
+//change type of addr to `(uintXX_t *`), and then apply `*` to get value of that addr. 
+//need vm addr of the real machine.
 static inline word_t host_read(void *addr, int len) {
   switch (len) {
-    case 1: return *(uint8_t  *)addr;
+    case 1: return *(uint8_t  *)addr; 
     case 2: return *(uint16_t *)addr;
     case 4: return *(uint32_t *)addr;
     IFDEF(CONFIG_ISA64, case 8: return *(uint64_t *)addr);

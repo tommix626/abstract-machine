@@ -19,12 +19,16 @@
 #include <readline/history.h>
 #include "sdb.h"
 
+
+#include <memory/paddr.h>
+#include<common.h> //used for word_t
+
 static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
 
-/* We use the `readline' library to provide more flexibility to read from stdin. */
+/* We use the `readline` library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
 
@@ -62,13 +66,22 @@ static int cmd_info(char *args) {
     isa_reg_display(); //rax            0x0                 0
   }
   else if (strcmp(arg,"w")==0){
-    
+    //TODO: watchpoint
   }
+  else {
     printf("Unknown command '%s'\n", arg);
+  }
   return 0;
 }
 
+//helper method: parse the value of an expression.
+static bool parse_EXPR ( char * str, int * N_ptr ){
+  *N_ptr = 0x80000000;
+  return true;
+}
 
+//helper method: read an int-like string `str` and change `N_ptr` into int. 
+//Return `false` if str is invalid int (eg. '23sfef').
 static bool stringToInt( char * str, int * N_ptr ){
 	*N_ptr = 0;
 	while(*str != 0) {
@@ -106,21 +119,36 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
-// static int cmd_x(char *args) {
-//   char *arg = strtok(NULL, " ");
-//   int i;
+static int cmd_x(char *args) {
+  /*eg: x 10 0x80000000*/
+  char *arg = strtok(NULL, " ");
 
-//   if (arg == NULL) {
-//     /* no argument given */
-//     printf("Missing argument. Option: [r]egister /[w]atchpoint \n");
-//     return 0;
-//   }
-//   else {
-    
-//   }
-//     printf("Unknown command '%s'\n", arg);
-//   return 0;
-// }
+  if (arg == NULL) {
+    /* no argument given */
+    printf("Missing argument. usage: x [N EXPR] \n");
+    return 0;
+  }
+  else {
+    /*check args is int.*/
+    int scan_len;
+    bool flag = stringToInt(arg, &scan_len);
+    if(!flag){
+      printf("Invalid argument: N not int!\n");
+      return 0;
+    }
+    arg = strtok(NULL, " "); //read next arg: EXPR
+    int expr_val=0;
+    flag = parse_EXPR(arg, &expr_val);
+    paddr_t start_addr = (paddr_t) expr_val; //FIXME: convert int to addr, might be buggy
+    printf("x read %d memory starting from %#x\n", scan_len, start_addr);
+
+    for (int i = 0; i<scan_len; i++,start_addr++){ //Q:TODO: if start_addr++ is implemented using iterator, then we might get outofbound error here.
+      word_t val = paddr_read(start_addr,4); // 4: reading 32-bit.
+      printf("%#x: %d\n",start_addr,val);
+    }
+  }
+  return 0;
+}
 
 // static int cmd_p(char *args) {
 //   char *arg = strtok(NULL, " ");
@@ -179,9 +207,9 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   /* TODO: Add more commands */
-  { "si", "[N] Step through N times", cmd_si },
-  { "info","[r/w] print information", cmd_info },
-  // { "x","[N EXPR] scan X memory at the place EXPR", cmd_x },
+  { "si", "[N] - Step through N times", cmd_si },
+  { "info","rw - print information", cmd_info },
+  { "x","N EXPR - scan N 4-byte memory starting at the place EXPR", cmd_x },
   // { "p","print", cmd_p },
   // { "w","set watchpoint", cmd_w },
   // { "d","delete watchpoint", cmd_d },

@@ -26,7 +26,7 @@ static char code_buf[65536 + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
 "int main() { "
-"  unsigned result = %s; "
+"  unsigned result = ((unsigned) 0) + %s; "
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
@@ -56,11 +56,13 @@ static char * gen_num(char* buf){
 static char * gen_rand_op(){
   char operators[] = "+-*/";
   char random_operator = operators[choose(strlen(operators))];
-  strcat(buf,&random_operator);
+  strncat(buf,&random_operator,1);
 }
 
 void gen(char c, char* buf) {
-  strcat(buf, &c);
+  int len = strlen(buf);
+  buf[len] = c;
+  buf[len + 1] = '\0';//strcat(buf, &c);
 }
 
 static void gen_rand_expr(char* buf) {
@@ -68,7 +70,10 @@ static void gen_rand_expr(char* buf) {
   switch (choose(3)) {
     case 0: gen_num(buf); break;
     case 1: 
-      gen('(',buf); gen_rand_expr(buf); gen(')', buf); break;
+      gen('(',buf); 
+      gen_rand_expr(buf); 
+      gen(')', buf); 
+      break;
     default: 
       gen_rand_expr(buf);
       gen_rand_op(buf); 
@@ -85,9 +90,9 @@ int main(int argc, char *argv[]) {
     sscanf(argv[1], "%d", &loop);
   }
   int i;
+  loop = 3;
   for (i = 0; i < loop; i ++) {
-    gen_rand_expr();
-
+    gen_rand_expr(buf);
     sprintf(code_buf, code_format, buf);
 
     FILE *fp = fopen("/tmp/.code.c", "w");

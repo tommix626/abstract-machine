@@ -61,8 +61,7 @@ static char * gen_rand_op(){
 
 void gen(char c, char* buf) {
   int len = strlen(buf);
-  buf[len] = c;
-  buf[len + 1] = '\0';//strcat(buf, &c);
+  strncat(buf, &c,1);
 }
 
 static void gen_rand_expr(char* buf) {
@@ -84,7 +83,7 @@ static void gen_rand_expr(char* buf) {
 
 int main(int argc, char *argv[]) {
   int seed = time(0);
-  srand(seed);
+  srand(0);
   int loop = 1;
   if (argc > 1) {
     sscanf(argv[1], "%d", &loop);
@@ -95,15 +94,15 @@ int main(int argc, char *argv[]) {
     gen_rand_expr(buf);
     sprintf(code_buf, code_format, buf);
 
-    FILE *fp = fopen("/tmp/.code.c", "w");
+    FILE *fp = fopen("./tmp/.code.c", "w");
     assert(fp != NULL);
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc ./tmp/.code.c -o ./tmp/.expr");
     if (ret != 0) continue;
 
-    fp = popen("/tmp/.expr", "r");
+    fp = popen("./tmp/.expr", "r");
     assert(fp != NULL);
 
     int result;

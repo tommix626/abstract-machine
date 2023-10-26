@@ -83,16 +83,20 @@ static void gen_paren(char* buf){
 
 }
 
-enum {BUF_FRONT,BUF_END}
+void gen(char c, char* buf) {
+  strcat(buf, &c);
+}
+
+enum { BUF_FRONT,BUF_END };
+
 static void gen_rand_expr(char* buf) {
   //  strcpy(buf,  gen_rand_expr_inner(100));
   switch (choose(3)) {
     case 0: gen_num(buf); break;
     case 1: 
-      gen_paren(buf); break;
+      gen('(',buf); gen_rand_expr(buf); gen(')', buf); break;
     default: 
-      char temp_buf[65536+128];
-      gen_rand_expr(temp_buf);
+      gen_rand_expr(buf);
       gen_rand_op(buf); 
       gen_rand_expr(buf); break;
   }

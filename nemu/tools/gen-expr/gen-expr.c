@@ -60,24 +60,6 @@ static char * gen_rand_op(){
 }
 
 
-static char * gen_rand_expr_inner(int layer) {
-  if(layer<=0){
-    return;
-  }
-  switch (choose(3)) {
-    case 0: return gen_num(); break;
-    case 1: 
-      char * dest = "(";
-      strcat(dest,gen_rand_expr_inner(layer-1));
-      strcat(dest,")");
-      return dest; break;
-    default: 
-      char * left=gen_rand_expr_inner(layer-1-choose(3)), right=gen_rand_expr_inner(layer-1-choose(3));
-      strcat(left,gen_rand_op());
-      strcat(left,right);
-      return left; break;
-  }
-}
 
 static void gen_paren(char* buf){
 

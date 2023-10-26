@@ -60,11 +60,6 @@ static char * gen_rand_op(){
 }
 
 
-
-static void gen_paren(char* buf){
-
-}
-
 void gen(char c, char* buf) {
   strcat(buf, &c);
 }

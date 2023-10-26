@@ -59,12 +59,9 @@ static char * gen_rand_op(){
   strcat(buf,&random_operator);
 }
 
-
 void gen(char c, char* buf) {
   strcat(buf, &c);
 }
-
-enum { BUF_FRONT,BUF_END };
 
 static void gen_rand_expr(char* buf) {
   //  strcpy(buf,  gen_rand_expr_inner(100));

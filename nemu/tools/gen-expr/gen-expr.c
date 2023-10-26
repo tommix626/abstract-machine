@@ -31,9 +31,73 @@ static char *code_format =
 "  return 0; "
 "}";
 
-static void gen_rand_expr() {
-  buf[0] = '\0';
+// Generate a random number between 0 and n-1
+uint32_t choose(uint32_t n) {
+    // Ensure n is greater than 0 to avoid division by zero
+    if (n == 0) {
+        fprintf(stderr, "Error: choose() called with n=0\n");
+        exit(1);
+    }
+
+    int random_num = rand();
+    uint32_t result = (uint32_t)((double)random_num / RAND_MAX * n);
+    return result;
 }
+
+//add number to buf
+static char * gen_num(char* buf){
+  uint32_t number = choose(0xFFFF);
+  char number_buf[100]; 
+  sprintf(number_buf, "%d", number);
+  strcat(buf,number_buf);
+}
+
+//add op to buf
+static char * gen_rand_op(){
+  char operators[] = "+-*/";
+  char random_operator = operators[choose(strlen(operators))];
+  strcat(buf,&random_operator);
+}
+
+
+static char * gen_rand_expr_inner(int layer) {
+  if(layer<=0){
+    return;
+  }
+  switch (choose(3)) {
+    case 0: return gen_num(); break;
+    case 1: 
+      char * dest = "(";
+      strcat(dest,gen_rand_expr_inner(layer-1));
+      strcat(dest,")");
+      return dest; break;
+    default: 
+      char * left=gen_rand_expr_inner(layer-1-choose(3)), right=gen_rand_expr_inner(layer-1-choose(3));
+      strcat(left,gen_rand_op());
+      strcat(left,right);
+      return left; break;
+  }
+}
+
+static void gen_paren(char* buf){
+
+}
+
+enum {BUF_FRONT,BUF_END}
+static void gen_rand_expr(char* buf) {
+  //  strcpy(buf,  gen_rand_expr_inner(100));
+  switch (choose(3)) {
+    case 0: gen_num(buf); break;
+    case 1: 
+      gen_paren(buf); break;
+    default: 
+      char temp_buf[65536+128];
+      gen_rand_expr(temp_buf);
+      gen_rand_op(buf); 
+      gen_rand_expr(buf); break;
+  }
+}
+
 
 int main(int argc, char *argv[]) {
   int seed = time(0);

@@ -84,7 +84,6 @@ static void gen_rand_expr(char* buf) {
   }
 }
 
-
 int main(int argc, char *argv[]) {
   int seed = time(0);
   srand(0);
@@ -93,7 +92,7 @@ int main(int argc, char *argv[]) {
     sscanf(argv[1], "%d", &loop);
   }
   int i;
-  loop = 3;
+  // loop = 3;
   for (i = 0; i < loop; i ++) {
     memset(buf, '\0', sizeof(buf));
     gen_rand_expr(buf);

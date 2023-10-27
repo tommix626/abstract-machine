@@ -41,22 +41,8 @@ uint32_t choose(uint32_t n) {
 
     int random_num = rand();
     uint32_t result = (uint32_t)((double)random_num / RAND_MAX * n);
+    assert(result<n && result>=0);
     return result;
-}
-
-//add number to buf
-static char * gen_num(char* buf){
-  uint32_t number = choose(0xFFFF);
-  char number_buf[100]; 
-  sprintf(number_buf, "%d", number);
-  strcat(buf,number_buf);
-}
-
-//add op to buf
-static char * gen_rand_op(){
-  char operators[] = "+-*/";
-  char random_operator = operators[choose(strlen(operators))];
-  strncat(buf,&random_operator,1);
 }
 
 void gen(char c, char* buf) {
@@ -64,7 +50,25 @@ void gen(char c, char* buf) {
   strncat(buf, &c,1);
 }
 
+//add number to buf
+static char * gen_num(char* buf){
+  uint32_t number = choose(0xFFFFFFFF);
+  char number_buf[100]; 
+  sprintf(number_buf, "%u", number);
+  strcat(buf,number_buf);
+}
+
+//add op to buf
+static char * gen_rand_op(){
+  char operators[] = "+-*/";
+  char random_operator = operators[choose(strlen(operators))];
+  assert(random_operator);
+  gen(random_operator,buf); 
+}
+
+
 static void gen_rand_expr(char* buf) {
+  strcat(buf, "(unsigned)" );
   //  strcpy(buf,  gen_rand_expr_inner(100));
   switch (choose(3)) {
     case 0: gen_num(buf); break;
@@ -91,6 +95,7 @@ int main(int argc, char *argv[]) {
   int i;
   loop = 3;
   for (i = 0; i < loop; i ++) {
+    memset(buf, '\0', sizeof(buf));
     gen_rand_expr(buf);
     sprintf(code_buf, code_format, buf);
 

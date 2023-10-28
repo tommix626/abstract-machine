@@ -21,8 +21,8 @@
 #include <string.h>
 
 // this should be enough
-static char buf[65536] = {};
-static char code_buf[65536 + 128] = {}; // a little larger than `buf`
+static char buf[655360] = {};
+static char code_buf[655360 + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
 "int main() { "
@@ -67,20 +67,25 @@ static char * gen_rand_op(){
 }
 
 
-static void gen_rand_expr(char* buf) {
+static void gen_rand_expr(char* buf, int cnt) {
+  
   strcat(buf, "(unsigned)" );
   //  strcpy(buf,  gen_rand_expr_inner(100));
+  if(cnt < 0){
+    gen_num(buf);
+    return;
+  }
   switch (choose(3)) {
     case 0: gen_num(buf); break;
     case 1: 
       gen('(',buf); 
-      gen_rand_expr(buf); 
+      gen_rand_expr(buf,cnt-1); 
       gen(')', buf); 
       break;
     default: 
-      gen_rand_expr(buf);
+      gen_rand_expr(buf,cnt/2);
       gen_rand_op(buf); 
-      gen_rand_expr(buf); break;
+      gen_rand_expr(buf,cnt/2); break;
   }
 }
 
@@ -92,10 +97,10 @@ int main(int argc, char *argv[]) {
     sscanf(argv[1], "%d", &loop);
   }
   int i;
-  // loop = 3;
+  // loop = 300;
   for (i = 0; i < loop; i ++) {
     memset(buf, '\0', sizeof(buf));
-    gen_rand_expr(buf);
+    gen_rand_expr(buf,10000);
     sprintf(code_buf, code_format, buf);
 
     FILE *fp = fopen("./tmp/.code.c", "w");

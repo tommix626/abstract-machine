@@ -20,6 +20,13 @@ The following subprojects/components are included. Some of them are not fully im
 
 # WORK CHANGE LIST
 
-## pa1.1 implement `sdb` (simple debugger) mimicing instruction of `gdb`: 
+## pa1.1 implement `sdb` (simple debugger) mimicing instruction of `gdb`:  
+- nemu/src/monitor/sdb/sdb.c
 - ### support step run (`si [N]`), info register (`info r`), memory scanning (`x N ADDR_EXPR`).
 - ### support EXPR parsing with regex. (Arith Calculator!) Therefore support print command (`p EXPR`)
+
+## pa1.2 implement a random unit test generator and test `sdb` commands.
+- ### generating sequence of expression using recursion, deal with buffer overflow, zero division, and unsigned int problem. 
+    - nemu/tools/gen-expr/gen-expr.c
+    - nemu/tools/gen-expr/input (10000 lines of generated unit test)
+- ### 

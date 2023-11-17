@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     fp = popen("./tmp/.expr", "r");
     assert(fp != NULL);
 
-    int result;
+    int result=-1;
     ret = fscanf(fp, "%d", &result);
     pclose(fp);
 

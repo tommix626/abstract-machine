@@ -11,3 +11,4 @@
 include/config
 include/generated
 !/tools/gen-expr/input
+!/src/input

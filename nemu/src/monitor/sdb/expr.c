@@ -20,7 +20,7 @@
  */
 #include <regex.h>
 #include "sdb.h"
-
+#define MAX_TOKEN_NUM 32000
 enum {
   TK_NOTYPE = 256,
   TK_EQ,
@@ -32,6 +32,7 @@ enum {
   TK_DIVIDE,    // For '/'
   TK_LEFT_PAREN, // For '('
   TK_RIGHT_PAREN, // For ')'
+  TK_UNSIGNED,
 };
 
 static struct rule {
@@ -43,6 +44,7 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
+  {"\\(unsigned\\)", TK_UNSIGNED}, // matching unsigned, top priority, so placed at index 0
   {" +", TK_NOTYPE},    // spaces
   {"\\+", TK_PLUS},     // plus
   {"==", TK_EQ},        // equal
@@ -81,9 +83,18 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[MAX_TOKEN_NUM] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
+/*DEBUG Function*/
+static void print_token(int start, int end){
+  for (int i = start; i <= end; i++)
+  {
+    printf("%s ", tokens[i].str);
+  }
+  printf("\n\n");
+  
+}
 static bool make_token(char *e) {
   int position = 0;
   int i;
@@ -102,22 +113,22 @@ static bool make_token(char *e) {
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
-
-        /* TODO: Now a new token is recognized with rules[i]. Add codes
+        printf("position=%d\n",position);
+        /* TODO(DONE): Now a new token is recognized with rules[i]. Add codes
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
         if(substr_len>=32){
           panic("token buffer overflow");
         }
-        if (nr_token >= 32) {
+        if (nr_token >= MAX_TOKEN_NUM) {
           panic("Too many tokens\n");
         }
         switch (rules[i].token_type) {
-          case TK_NOTYPE:  break;
+          case TK_NOTYPE: case TK_UNSIGNED: break;
           default: 
             Token new_token = { .type = rules[i].token_type };
-            tokens[nr_token] = new_token;
+            tokens[nr_token] = new_token; //nr_token is the top counter
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token].str[substr_len] = '\0'; // Important, debugged for so long...
             nr_token++;
@@ -207,29 +218,30 @@ int find_main_operator(int p, int q, bool *success) {
   return main_operator;
 }
 
-bool check_parentheses(int p, int q) {
+bool check_parentheses(int p, int q) { //bug
   if (tokens[p].type != TK_LEFT_PAREN || tokens[q].type != TK_RIGHT_PAREN) {
     /* Mismatched parentheses */
     return false;
   }
 
   int balance = 0;
-  for (int i = p; i <= q; i++) {
+  for (int i = p; i < q; i++) {
     if (tokens[i].type == TK_LEFT_PAREN) {
       balance++;
     } else if (tokens[i].type == TK_RIGHT_PAREN) {
       balance--;
-      if (balance < 0) {
+      if (balance <= 0) {
         /* Unmatched closing parenthesis */
         return false;
       }
     }
   }
 
-  return (balance == 0);
+  return (balance == 1);
 }
 
 word_t evaluate_expression(int p, int q, bool *success) {
+  print_token(p, q); //DEBUG
   if (*success == false) {
     return 0;
   }
@@ -296,15 +308,19 @@ word_t evaluate_expression(int p, int q, bool *success) {
   }
 }
 
+
+
 word_t expr(char *e, bool *success) {
+  memset(tokens, 0, sizeof(tokens));
   if (!make_token(e)) {
     *success = false;
     printf("make token failed\n");
     return 0;
   }
 
-  /* TODO: Insert codes to evaluate the expression. */
-  // TODO();
+  print_token(0, nr_token);//DEBUG
+
+  /* Insert codes to evaluate the expression. DONE*/
 
    return evaluate_expression(0, nr_token - 1, success);
 }

@@ -96,7 +96,7 @@ static int nr_token __attribute__((used))  = 0;
 
 /*DEBUG Function*/
 static void print_token(int start, int end){
-  for (int i = start; i <= end; i++)
+  for (int i = start; i < end; i++)
   {
     printf("%s(type:%d)  ", tokens[i].str, tokens[i].type);
   }
@@ -255,7 +255,7 @@ bool check_parentheses(int p, int q) {
 }
 
 word_t evaluate_expression(int p, int q, bool *success) {
-  // printf("eval from %d to %d\n", p,q); //debug
+  printf("eval from %d to %d\n", p,q); //debug
   // print_token(p, q); //DEBUG
   if (*success == false) {
     return 0;
@@ -329,6 +329,7 @@ word_t evaluate_expression(int p, int q, bool *success) {
       break;
     case TK_AND:
       combVal = val1 && val2;
+      break;
     default:
       // Invalid operator
       *success = false;

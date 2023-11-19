@@ -47,6 +47,7 @@ static char* rl_gets() {
   return line_read;
 }
 
+/// @brief [c]ontinue program until done
 static int cmd_c(char *args) {
   cpu_exec(-1);
   return 0;
@@ -54,6 +55,10 @@ static int cmd_c(char *args) {
 
 
 
+/// @brief print information
+/// @param args [r/w]
+///             r - register
+///             w - watchpoint
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
   // int i;
@@ -84,8 +89,8 @@ static int cmd_info(char *args) {
 
 
 
-//helper method: read an int-like string `str` and change `N_ptr` into int. 
-//Return `false` if str is invalid int (eg. '23sfef').
+/// @brief helper method: read an int-like string `str` and change `N_ptr` into int. 
+/// @return Return `false` if str is invalid int (eg. '23sfef').
 static bool stringToInt( char * str, int * N_ptr ){
 	*N_ptr = 0;
 	while(*str != 0) {
@@ -98,6 +103,8 @@ static bool stringToInt( char * str, int * N_ptr ){
 	return true;
 }
 
+/// @brief stepi, run a program a single step
+/// @param args int, how many stepi to repeat.
 static int cmd_si( char *args ) {
 	char *arg = strtok(NULL, " ");
 	int N=0;
@@ -117,12 +124,18 @@ static int cmd_si( char *args ) {
 	return 0;
 }
 
+/// @brief  quit the program
 static int cmd_q(char *args) {
   return -1;
 }
 
+/// @brief print help message
 static int cmd_help(char *args);
 
+/// @brief scan memory
+///         eg: x 10 0x80000000
+/// @param args [N] EXPR
+///             N - number to 4-byte to be evaluate
 static int cmd_x(char *args) {
   /*eg: x 10 0x80000000*/
   int ori_arg_len = strlen(args);
@@ -155,11 +168,11 @@ static int cmd_x(char *args) {
       return 0;
     }
     paddr_t start_addr = (paddr_t) expr_val; //FIXME: convert int to addr, might be buggy
-    printf("x read %d memory starting from %#x\n", scan_len, start_addr);
+    printf("x read %d memory starting from %#x\n", scan_len, start_addr); //debug
 
     for (int i = 0; i<scan_len; i++,start_addr++){ //Q:TODO: if start_addr++ is implemented using iterator, then we might get outofbound error here.
       word_t val = paddr_read(start_addr,4); // 4: reading 32-bit.
-      printf("%#x: %d\n",start_addr,val);
+      printf("%#x: %-10d\t%#-10x\n",start_addr,val,val);
     }
   }
   return 0;

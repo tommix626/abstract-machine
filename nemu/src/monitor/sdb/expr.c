@@ -48,8 +48,8 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", TK_PLUS},     // plus
   {"==", TK_EQ},        // equal
+  {"0[xX][0-9a-fA-F]+", TK_HEXNUM}, //numbers (hex) must before decimal
   {"[0-9]+", TK_NUM},   // numbers (decimal)
-  {"0[xX][0-9a-fA-F]+", TK_HEXNUM}, //numbers (hex)
   {"-", TK_MINUS},      // minus
   {"\\*", TK_MULTIPLY}, // multiply
   {"/", TK_DIVIDE},     // divide
@@ -111,8 +111,8 @@ static bool make_token(char *e) {
         int substr_len = pmatch.rm_eo;
 
         //debug
-        // Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-        //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
+        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+            i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
         // printf("position=%d\n",position); //DEBUG

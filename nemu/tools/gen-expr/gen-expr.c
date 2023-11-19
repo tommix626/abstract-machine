@@ -25,11 +25,18 @@ static char buf[655360] = {};
 static char code_buf[655360 + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
+"#include <signal.h>\n"
+"#include <stdlib.h>\n"
 "int main() { "
 "  unsigned result = ((unsigned) 0) + %s; "
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
+
+
+// "void handle_sigfpe(int signal) {exit(1);}"
+
+// "  signal(SIGFPE, handle_sigfpe);"
 
 // Generate a random number between 0 and n-1
 uint32_t choose(uint32_t n) {
@@ -108,8 +115,10 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc ./tmp/.code.c -o ./tmp/.expr");
-    if (ret != 0) continue;
+    int ret = system("gcc ./tmp/.code.c -o ./tmp/.expr -Werror"); //Werroe filter out the div 0 warning completely
+
+    // printf("ret=%d\n",ret);
+	 	if (ret != 0) continue;
 
     fp = popen("./tmp/.expr", "r");
     assert(fp != NULL);
@@ -117,6 +126,7 @@ int main(int argc, char *argv[]) {
     int result=-1;
     ret = fscanf(fp, "%d", &result);
     pclose(fp);
+    // if (ret != 1) continue;
 
     printf("%u %s\n", result, buf);
   }

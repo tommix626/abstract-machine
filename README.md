@@ -18,6 +18,9 @@ The following subprojects/components are included. Some of them are not fully im
 * [Nanos-lite](https://github.com/NJU-ProjectN/nanos-lite)
 * [Navy-apps](https://github.com/NJU-ProjectN/navy-apps)
 
+
+
+
 # WORK CHANGE LIST
 
 ## pa1.1 implement `sdb` (simple debugger) mimicing instruction of `gdb`:  
@@ -25,8 +28,9 @@ The following subprojects/components are included. Some of them are not fully im
 - ### support step run (`si [N]`), info register (`info r`), memory scanning (`x N ADDR_EXPR`).
 - ### support EXPR parsing with regex. (Arith Calculator!) Therefore support print command (`p EXPR`)
 
-## pa1.2 implement a random unit test generator and test `sdb` commands.
+## pa1.2 implement a random unit test generator and test `sdb` commands on evaluating expression.
 - ### generating sequence of expression using recursion, deal with buffer overflow, zero division, and unsigned int problem. 
     - nemu/tools/gen-expr/gen-expr.c
-    - nemu/tools/gen-expr/input (10000 lines of generated unit test)
-- ### 
+    - nemu/tools/gen-expr/testout (10000 lines of generated unit test)
+- ### Add testing function when booting
+    - nemu/src/nemu-main.c:42 test_expr()

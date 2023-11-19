@@ -95,6 +95,7 @@ static void print_token(int start, int end){
   printf("\n\n");
   
 }
+
 static bool make_token(char *e) {
   int position = 0;
   int i;
@@ -146,8 +147,6 @@ static bool make_token(char *e) {
 
   return true;
 }
-
-
 
 
 static word_t parseHexStringToInt(const char* hexString) {
@@ -218,7 +217,7 @@ int find_main_operator(int p, int q, bool *success) {
   return main_operator;
 }
 
-bool check_parentheses(int p, int q) { //bug
+bool check_parentheses(int p, int q) {
   if (tokens[p].type != TK_LEFT_PAREN || tokens[q].type != TK_RIGHT_PAREN) {
     /* Mismatched parentheses */
     return false;
@@ -241,6 +240,7 @@ bool check_parentheses(int p, int q) { //bug
 }
 
 word_t evaluate_expression(int p, int q, bool *success) {
+  printf("eval from %d to %d\n", p,q); //debug
   print_token(p, q); //DEBUG
   if (*success == false) {
     return 0;
@@ -284,28 +284,36 @@ word_t evaluate_expression(int p, int q, bool *success) {
   if (!*success) {
     return 0;
   }
-  
+  word_t combVal;
+  // printf("This is a test!");
   // Perform the operation based on the main operator
   switch (tokens[op].type) {
     case TK_PLUS:
-      return val1 + val2;
+      combVal = val1 + val2;
+      break;
     case TK_MINUS:
-      return val1 - val2;
+      combVal = val1 - val2;
+      break;
     case TK_MULTIPLY:
-      return val1 * val2;
+      combVal = val1 * val2;
+      break;
     case TK_DIVIDE:
       if (val2 == 0) { // div by 0
         *success = false;
-        return 0;
+        combVal = 0;
       }
-      return val1 / val2;
+      combVal = val1 / val2;
+      break;
     case TK_EQ:
-      return val1 == val2;
+      combVal = val1 == val2;
+      break;
     default:
       // Invalid operator
       *success = false;
-      return 0;
+      combVal = 0;
   }
+  printf("combine value=%u\n", combVal);
+  return combVal;
 }
 
 

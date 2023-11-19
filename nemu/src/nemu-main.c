@@ -37,13 +37,15 @@ int main(int argc, char *argv[]) {
   return is_exit_status_bad();
 }
 
+
+/// @brief test th expr evaluation function
 void test_expr()
 {
   char *line = NULL;
   size_t len = 0;
   ssize_t read;
 
-  FILE *file = fopen("./src/input", "r");
+  FILE *file = fopen("./src/testexpr", "r");
   if (!file) {
       perror("Unable to open the file \"input\"");
       return;
@@ -72,5 +74,5 @@ void test_expr()
   free(line);
   fclose(file); 
 
-  assert(0);
+  // assert(0);
 }

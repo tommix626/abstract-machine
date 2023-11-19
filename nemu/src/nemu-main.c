@@ -58,21 +58,21 @@ void test_expr()
       char *result_str = strtok(line, " ");
       if (result_str == NULL) { assert(0); continue; }
       uint32_t result = strtol(result_str, NULL, 0);
-      printf("Result= %u\n", result);
+      // printf("Result= %u\n", result);
       /* treat the remaining string as the expression*/
       // char *expr = result_str + strlen(result_str) + 1; //skip the command and get the args.
       char *test_expr = strtok(NULL, "\n");
-      printf("EXPR= %s\n", test_expr);
+      // printf("EXPR= %s\n", test_expr);
        
       bool sflag = true;
       uint32_t parse_result = expr(test_expr, &sflag);
-      printf("Result= %u; \t\t Parse get %u\n", result,parse_result);
+      // printf("Result= %u; \t\t Parse get %u\n", result,parse_result);
       assert(result==parse_result);
-      printf("pass\n");
   }
 
   free(line);
   fclose(file); 
 
+  printf("expr10000 test pass\n");
   // assert(0);
 }

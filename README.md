@@ -27,6 +27,7 @@ The following subprojects/components are included. Some of them are not fully im
 - nemu/src/monitor/sdb/sdb.c
 - ### support step run (`si [N]`), info register (`info r`), memory scanning (`x N ADDR_EXPR`).
 - ### support EXPR parsing with regex. (Arith Calculator!) Therefore support print command (`p EXPR`)
+    - tested in pa1.2
 
 ## pa1.2 implement a random unit test generator and test `sdb` commands on evaluating expression.
 - ### generating sequence of expression using recursion, deal with buffer overflow, zero division, and unsigned int problem. 

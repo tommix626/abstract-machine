@@ -86,15 +86,15 @@ typedef struct token {
 static Token tokens[MAX_TOKEN_NUM] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
-/*DEBUG Function*/
-static void print_token(int start, int end){
-  for (int i = start; i <= end; i++)
-  {
-    printf("%s ", tokens[i].str);
-  }
-  printf("\n\n");
+// /*DEBUG Function*/
+// static void print_token(int start, int end){
+//   for (int i = start; i <= end; i++)
+//   {
+//     printf("%s ", tokens[i].str);
+//   }
+//   printf("\n\n");
   
-}
+// }
 
 static bool make_token(char *e) {
   int position = 0;
@@ -110,11 +110,12 @@ static bool make_token(char *e) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
-        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+        //debug
+        // Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+        //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
-        printf("position=%d\n",position);
+        // printf("position=%d\n",position); //DEBUG
         /* TODO(DONE): Now a new token is recognized with rules[i]. Add codes
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
@@ -240,8 +241,8 @@ bool check_parentheses(int p, int q) {
 }
 
 word_t evaluate_expression(int p, int q, bool *success) {
-  printf("eval from %d to %d\n", p,q); //debug
-  print_token(p, q); //DEBUG
+  // printf("eval from %d to %d\n", p,q); //debug
+  // print_token(p, q); //DEBUG
   if (*success == false) {
     return 0;
   }
@@ -285,7 +286,6 @@ word_t evaluate_expression(int p, int q, bool *success) {
     return 0;
   }
   word_t combVal;
-  // printf("This is a test!");
   // Perform the operation based on the main operator
   switch (tokens[op].type) {
     case TK_PLUS:
@@ -312,7 +312,7 @@ word_t evaluate_expression(int p, int q, bool *success) {
       *success = false;
       combVal = 0;
   }
-  printf("combine value=%u\n", combVal);
+  // printf("combine value=%u\n", combVal); //DEBUG
   return combVal;
 }
 
@@ -326,7 +326,7 @@ word_t expr(char *e, bool *success) {
     return 0;
   }
 
-  print_token(0, nr_token);//DEBUG
+  // print_token(0, nr_token);//DEBUG
 
   /* Insert codes to evaluate the expression. DONE*/
 

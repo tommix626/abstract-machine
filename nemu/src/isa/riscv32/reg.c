@@ -16,6 +16,7 @@
 #include <isa.h>
 #include "local-include/reg.h"
 
+//use reg_name(reg_id) to get name of regs, total number of reg is MUXDEF(CONFIG_RVE, 16, 32);
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -25,10 +26,29 @@ const char *regs[] = {
 
 void isa_reg_display() {
   for(int reg_id = 0; reg_id < MUXDEF(CONFIG_RVE, 16, 32); reg_id++){
-    printf("%-15s %#-10x %#-10x\n", reg_name(reg_id), cpu.gpr[reg_id],cpu.gpr[reg_id]);
+    printf("%-15s %-10u %#-10x\n", reg_name(reg_id), cpu.gpr[reg_id],cpu.gpr[reg_id]);
   }
 }
 
+const int get_reg_id_by_name(const char * s){
+  for(int reg_id = 0; reg_id < MUXDEF(CONFIG_RVE, 16, 32); reg_id++){
+    if(strcmp(s,reg_name(reg_id)) == 0){
+      return reg_id;
+    }
+  }
+  return -1;
+}
+
+/// @brief return the value of the register named s. success shows if the operation is successful
+/// @param s 
+/// @param success 
+/// @return 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  return 0;
+  int reg_id = get_reg_id_by_name(s+1);
+  if(reg_id == -1){
+    Log("invalid reg name");
+    *success = false;
+    return 0;
+  }
+  return cpu.gpr[reg_id];
 }

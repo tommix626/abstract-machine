@@ -23,16 +23,21 @@
 #define MAX_TOKEN_NUM 32000
 enum {
   TK_NOTYPE = 256,
-  TK_EQ,
+  TK_EQ,        // For ==
   TK_NUM,       // For numbers
   TK_HEXNUM,    // For hex numbers
   TK_PLUS,      // For '+'
   TK_MINUS,     // For '-'
-  TK_MULTIPLY,  // For '*'
+  TK_MULTIPLY,  // For '*' 262
   TK_DIVIDE,    // For '/'
   TK_LEFT_PAREN, // For '('
   TK_RIGHT_PAREN, // For ')'
   TK_UNSIGNED,
+//extended:
+  TK_UNEQ,      //For !=
+  TK_AND,       // For '&&'
+  TK_DEREF, //for '*' dereference 269
+  TK_REG, // for '$reg'
 };
 
 static struct rule {
@@ -51,10 +56,13 @@ static struct rule {
   {"0[xX][0-9a-fA-F]+", TK_HEXNUM}, //numbers (hex) must before decimal
   {"[0-9]+", TK_NUM},   // numbers (decimal)
   {"-", TK_MINUS},      // minus
-  {"\\*", TK_MULTIPLY}, // multiply
+  {"\\*", TK_MULTIPLY}, // multiply or deref TODO
   {"/", TK_DIVIDE},     // divide
   {"\\(", TK_LEFT_PAREN},  // left parenthesis
   {"\\)", TK_RIGHT_PAREN}, // right parenthesis
+  {"!=", TK_UNEQ},
+  {"&&", TK_AND},
+  {"\\$[0-9a-zA-Z]+", TK_REG},
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -86,15 +94,15 @@ typedef struct token {
 static Token tokens[MAX_TOKEN_NUM] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
-// /*DEBUG Function*/
-// static void print_token(int start, int end){
-//   for (int i = start; i <= end; i++)
-//   {
-//     printf("%s ", tokens[i].str);
-//   }
-//   printf("\n\n");
+/*DEBUG Function*/
+static void print_token(int start, int end){
+  for (int i = start; i <= end; i++)
+  {
+    printf("%s(type:%d)  ", tokens[i].str, tokens[i].type);
+  }
+  printf("\n\n");
   
-// }
+}
 
 static bool make_token(char *e) {
   int position = 0;
@@ -126,7 +134,7 @@ static bool make_token(char *e) {
         if (nr_token >= MAX_TOKEN_NUM) {
           panic("Too many tokens\n");
         }
-        switch (rules[i].token_type) {
+        switch (rules[i].token_type) { //#TODO#3 preprocess and get info into .str field done\*
           case TK_NOTYPE: case TK_UNSIGNED: break;
           default: 
             Token new_token = { .type = rules[i].token_type };
@@ -174,7 +182,7 @@ static word_t parseHexStringToInt(const char* hexString) {
     return (word_t)result; // Cast the long integer result to int
 }
 
-int find_main_operator(int p, int q, bool *success) {
+int find_main_operator(int p, int q, bool *success) { //change precedence#TODO#1
   // Find the operator with the lowest precedence
   int parentheses_count = 0;
   int main_operator = -1;
@@ -188,19 +196,25 @@ int find_main_operator(int p, int q, bool *success) {
     } else if (parentheses_count == 0) {
       // Only consider operators outside of parentheses
       if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
-        int precedence = 1;
+        int precedence = 3;
         if (precedence <= lowest_precedence) {
           lowest_precedence = precedence;
           main_operator = i;
         }
       } else if (tokens[i].type == TK_MULTIPLY || tokens[i].type == TK_DIVIDE) {
+        int precedence = 4;
+        if (precedence <= lowest_precedence) {
+          lowest_precedence = precedence;
+          main_operator = i;
+        }
+      } else if (tokens[i].type == TK_EQ || tokens[i].type == TK_UNEQ) {
         int precedence = 2;
         if (precedence <= lowest_precedence) {
           lowest_precedence = precedence;
           main_operator = i;
         }
-      } else if (tokens[i].type == TK_EQ) {
-        int precedence = 0;
+      } else if (tokens[i].type == TK_AND) {
+        int precedence = 1;
         if (precedence <= lowest_precedence) {
           lowest_precedence = precedence;
           main_operator = i;
@@ -253,12 +267,15 @@ word_t evaluate_expression(int p, int q, bool *success) {
   }
   
   if (p == q) {
-    // Single token in the expression
+    // Single token in the expression, process it #TODO#2done\*
     if (tokens[p].type == TK_NUM) {
       return strtol(tokens[p].str, NULL, 0);
     }
     else if (tokens[p].type == TK_HEXNUM) {
       return parseHexStringToInt(tokens[p].str);
+    }
+    else if (tokens[p].type == TK_REG) {
+      return isa_reg_str2val(tokens[p].str, success);
     }
     else {
       *success = false;
@@ -307,6 +324,11 @@ word_t evaluate_expression(int p, int q, bool *success) {
     case TK_EQ:
       combVal = val1 == val2;
       break;
+    case TK_UNEQ:
+      combVal = val1 != val2;
+      break;
+    case TK_AND:
+      combVal = val1 && val2;
     default:
       // Invalid operator
       *success = false;
@@ -325,8 +347,13 @@ word_t expr(char *e, bool *success) {
     printf("make token failed\n");
     return 0;
   }
-
-  // print_token(0, nr_token);//DEBUG
+  //decide if * represents dereference or multiplication
+  for (int i = 0; i < nr_token; i ++) {
+    if (tokens[i].type == TK_MULTIPLY && (i == 0 || (tokens[i - 1].type != TK_NUM && tokens[i - 1].type != TK_HEXNUM && tokens[i - 1].type != TK_REG && tokens[i - 1].type != TK_RIGHT_PAREN)) ) {
+      tokens[i].type = TK_DEREF;
+    }
+  }
+  print_token(0, nr_token);//DEBUG
 
   /* Insert codes to evaluate the expression. DONE*/
 

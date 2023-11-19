@@ -192,7 +192,7 @@ static int cmd_p(char *args) {
     printf("Invalid EXPR argument.\n");
     return 0;
   }
-  printf("%d\n",expr_val);
+  printf("%u \t [%#x]\n",expr_val,expr_val);
 
   return 0;
 }

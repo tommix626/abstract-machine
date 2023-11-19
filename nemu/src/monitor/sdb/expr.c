@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <memory/paddr.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -96,7 +97,7 @@ static int nr_token __attribute__((used))  = 0;
 
 /*DEBUG Function*/
 static void print_token(int start, int end){
-  for (int i = start; i < end; i++)
+  for (int i = start; i <= end; i++)
   {
     printf("%s(type:%d)  ", tokens[i].str, tokens[i].type);
   }
@@ -134,7 +135,7 @@ static bool make_token(char *e) {
         if (nr_token >= MAX_TOKEN_NUM) {
           panic("Too many tokens\n");
         }
-        switch (rules[i].token_type) { //#TODO#3 preprocess and get info into .str field done\*
+        switch (rules[i].token_type) { //preprocess and get info into .str field
           case TK_NOTYPE: case TK_UNSIGNED: break;
           default: 
             Token new_token = { .type = rules[i].token_type };
@@ -182,7 +183,9 @@ static word_t parseHexStringToInt(const char* hexString) {
     return (word_t)result; // Cast the long integer result to int
 }
 
-int find_main_operator(int p, int q, bool *success) { //change precedence#TODO#1
+
+//find by precedence cheatsheet:https://www.cs.uic.edu/~i109/Notes/COperatorPrecedenceTable.pdf
+int find_main_operator(int p, int q, bool *success) { 
   // Find the operator with the lowest precedence
   int parentheses_count = 0;
   int main_operator = -1;
@@ -219,7 +222,14 @@ int find_main_operator(int p, int q, bool *success) { //change precedence#TODO#1
           lowest_precedence = precedence;
           main_operator = i;
         }
-      }
+      } 
+      // else if (tokens[i].type == TK_DEREF) { // do we need it? or just like paren, can do it "inplace" (YES)
+      //   int precedence = 5;
+      //   if (precedence <= lowest_precedence) {
+      //     lowest_precedence = precedence;
+      //     main_operator = i;
+      //   }
+      // }
     }
   }
 
@@ -254,6 +264,9 @@ bool check_parentheses(int p, int q) {
   return (balance == 1);
 }
 
+word_t dereference(paddr_t addr, bool *success) {
+  return paddr_read(addr,4); //4: reading 32-bit addr
+}
 word_t evaluate_expression(int p, int q, bool *success) {
   printf("eval from %d to %d\n", p,q); //debug
   // print_token(p, q); //DEBUG
@@ -267,7 +280,7 @@ word_t evaluate_expression(int p, int q, bool *success) {
   }
   
   if (p == q) {
-    // Single token in the expression, process it #TODO#2done\*
+    // Single token in the expression, process it
     if (tokens[p].type == TK_NUM) {
       return strtol(tokens[p].str, NULL, 0);
     }
@@ -287,6 +300,15 @@ word_t evaluate_expression(int p, int q, bool *success) {
      * If that is the case, just throw away the parentheses.
      */
     return evaluate_expression(p + 1, q - 1, success);
+  }
+  else if (tokens[p].type == TK_DEREF) {
+    //if the first is a deref, find the val of the rest and apply the deref.
+    word_t addr = evaluate_expression(p+1, q, success);
+    if(*success==false) {
+      return 0;
+    }
+    return dereference((paddr_t) addr, success);
+
   }
   
   int op = find_main_operator(p, q, success);

@@ -35,3 +35,6 @@ The following subprojects/components are included. Some of them are not fully im
     - nemu/tools/gen-expr/testout (10000 lines of generated unit test)
 - ### Add testing function when booting
     - nemu/src/nemu-main.c:42 test_expr()
+## pa1.3 Watchpoint
+- extend EXPR evaluation functionality, support register value ($reg), ptr dereference (*), and other logic operator (!=,&&)
+    - nemu/src/monitor/sdb/sdb.c

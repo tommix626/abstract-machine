@@ -15,7 +15,7 @@
 
 #include "sdb.h"
 
-#define NR_WP 32
+#define NR_WP 32 //number of wp
 
 typedef struct watchpoint {
   int NO;

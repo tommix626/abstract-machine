@@ -36,5 +36,7 @@ The following subprojects/components are included. Some of them are not fully im
 - ### Add testing function when booting
     - nemu/src/nemu-main.c:42 test_expr()
 ## pa1.3 Watchpoint
-- extend EXPR evaluation functionality, support register value ($reg), ptr dereference (*), and other logic operator (!=,&&)
+- ### extend EXPR evaluation functionality, support register value ($reg), ptr dereference (*), and other logic operator (!=,&&)
     - nemu/src/monitor/sdb/sdb.c
+- ### set up watchpoint pool API using linkedlist implementation:
+    - nemu/src/monitor/sdb/watchpoint.c

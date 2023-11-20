@@ -25,8 +25,12 @@ typedef struct watchpoint {
 
 } WP;
 
-static WP wp_pool[NR_WP] = {};
+static WP wp_pool[NR_WP] = {}; //NOTE:static var - cannot access from outside! ie: cannot use extern on them in other files
 static WP *head = NULL, *free_ = NULL;
+
+
+WP* new_wp();
+void free_wp(WP *wp);
 
 void init_wp_pool() {
   int i;
@@ -41,3 +45,46 @@ void init_wp_pool() {
 
 /* TODO: Implement the functionality of watchpoint */
 
+/// @brief check and return an idle wp.
+/// @return the idle wp, null if non-exist(also assert 0)
+WP* get_idle_wp(){
+  if (free_ == NULL) {
+    panic("Reach maximum watchpoint limit!");
+    assert(0);
+    return NULL;
+  }
+
+  WP* idle = free_;
+  free_ = free_->next;
+  //prepend idle to head
+  idle->next = head;
+  head = idle;
+  return idle;
+}
+/// @brief get a idle wp from pool
+/// @return the new watch point
+WP* new_wp(){
+  return get_idle_wp();
+}
+
+/// @brief free the given watchpoint
+/// @param wp the wp reference to be freed.
+void free_wp(WP *wp){
+  if (wp == head) {
+    head = head->next;
+    wp->next = free_;
+    free_ = wp;
+    return;
+  }
+  WP* curr = head;
+  while (curr->next != NULL) {
+    if (curr->next == wp) { //Doubts: why not use curr->NO == wp->NO? Which is better?
+      curr->next = curr->next->next;
+      wp->next = free_;
+      free_ = wp;
+      return;
+    }
+  }
+  panic("Pass invalid wp reference!");
+  
+}

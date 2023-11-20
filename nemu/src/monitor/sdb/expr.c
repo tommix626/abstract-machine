@@ -20,8 +20,8 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
-#include "sdb.h"
-#define MAX_TOKEN_NUM 32000
+#include <monitor/sdb.h>
+#define MAX_TOKEN_NUM 3200 //potential error for reducing size: FIXME
 enum {
   TK_NOTYPE = 256,
   TK_EQ,        // For ==

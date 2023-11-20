@@ -17,7 +17,8 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include "sdb.h"
+#include <monitor/sdb.h>
+#include <monitor/watchpoint.h> // for watchpoint
 
 
 #include <memory/paddr.h>
@@ -73,6 +74,8 @@ static int cmd_info(char *args) {
   }
   else if (strcmp(arg,"w")==0){
     //TODO: watchpoint
+
+
   }
   else {
     printf("Unknown command '%s'\n", arg);
@@ -82,7 +85,6 @@ static int cmd_info(char *args) {
 
 // //helper method: parse the value of an expression.
 // static bool parse_EXPR ( char * str, int * N_ptr ){
-  
 //   *N_ptr = 0x80000000;
 //   return true;
 // }
@@ -185,7 +187,7 @@ static int cmd_p(char *args) {
     return 0;
   }
 
-  printf("EXPR = %s\n", args);
+  printf("EXPR = %s\n", args); //debug
   bool flag = true;
   word_t expr_val=expr(args, &flag);
   if(!flag) {
@@ -194,6 +196,34 @@ static int cmd_p(char *args) {
   }
   printf("%u \t [%#x]\n",expr_val,expr_val);
 
+  return 0;
+}
+
+/// @brief set watchpoint
+///         eg: w *0x2000
+/// @param args EXPR
+///             N - number to 4-byte to be evaluate
+static int cmd_w(char *args) {
+  if (*args == '\0' || args == NULL) {
+    /* no argument given */
+    printf("Missing argument. usage: w [EXPR] \n");
+    return 0;
+  }
+
+  printf("EXPR = %s\n", args); //debug
+  bool flag = true;
+  word_t expr_val=expr(args, &flag);
+  if(!flag) {
+    printf("Invalid EXPR argument. Want to save the expr for future compilation? TODO:not implemented yet\n");
+    //TODO
+    return 0;
+  }
+  //store to an idle wp
+  WP* idle = new_wp();
+  idle->old_value = expr_val;
+  strcpy(idle->str,args);
+  // idle->str = args; //why not a good idea? should copy to local mem,
+  Log("Watchpoint %d added for EXPR=%s, initial value=%u\n",idle->NO, idle->str, idle->old_value);
   return 0;
 }
 
@@ -210,7 +240,7 @@ static struct {
   { "info","rw - print information", cmd_info },
   { "x","N EXPR - scan N 4-byte memory starting at the place EXPR", cmd_x },
   { "p","EXPR - print expression", cmd_p },
-  // { "w","set watchpoint", cmd_w },
+  { "w","EXPR - set watchpoint", cmd_w },
   // { "d","delete watchpoint", cmd_d },
 
 };

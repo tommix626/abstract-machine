@@ -26,7 +26,7 @@ const char *regs[] = {
 
 void isa_reg_display() {
   for(int reg_id = 0; reg_id < MUXDEF(CONFIG_RVE, 16, 32); reg_id++){
-    printf("%-15s %-10u %#-10x\n", reg_name(reg_id), cpu.gpr[reg_id],cpu.gpr[reg_id]);
+    printf("%-15s %#-10x %-10u\n", reg_name(reg_id), cpu.gpr[reg_id],cpu.gpr[reg_id]);
   }
 }
 

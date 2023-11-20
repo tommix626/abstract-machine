@@ -14,7 +14,7 @@
 ***************************************************************************************/
 
 #include <common.h>
-#include "./monitor/sdb/sdb.h" //include for unit test on EXPR
+#include <monitor/sdb.h> //include for unit test on EXPR
 
 void init_monitor(int, char *[]);
 void am_init_monitor();

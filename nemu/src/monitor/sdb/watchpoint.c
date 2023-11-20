@@ -13,24 +13,12 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "sdb.h"
+#include <monitor/watchpoint.h>
 
-#define NR_WP 32 //number of wp
-
-typedef struct watchpoint {
-  int NO;
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-
-} WP;
 
 static WP wp_pool[NR_WP] = {}; //NOTE:static var - cannot access from outside! ie: cannot use extern on them in other files
 static WP *head = NULL, *free_ = NULL;
 
-
-WP* new_wp();
-void free_wp(WP *wp);
 
 void init_wp_pool() {
   int i;
@@ -49,7 +37,7 @@ void init_wp_pool() {
 /// @return the idle wp, null if non-exist(also assert 0)
 WP* get_idle_wp(){
   if (free_ == NULL) {
-    panic("Reach maximum watchpoint limit!");
+    panic("Reach maximum watchpoint limit!\n");
     assert(0);
     return NULL;
   }
@@ -84,7 +72,27 @@ void free_wp(WP *wp){
       free_ = wp;
       return;
     }
+    curr = curr->next;
   }
-  panic("Pass invalid wp reference!");
+  panic("Pass invalid wp reference!\n");
   
+}
+
+void check_watchpoint(bool *stop_flag)
+{
+  WP* curr = head;
+  bool flag = true;
+  while (curr != NULL) {
+    flag = true;
+    word_t expr_val=expr(curr->str, &flag);
+    if(!flag) {
+      Log("watchpoint %d has invalid EXPR\n",curr->NO);
+    }
+    else if (expr_val != curr->old_value) {
+      Log("Watchpoint %d value change from %u to %u, EXPR=%s\n",curr->NO,curr->old_value,expr_val,curr->str);
+      *stop_flag = false; // need a stop
+      curr->old_value = expr_val; //update old val to new one
+    }
+    curr = curr->next;
+  }
 }

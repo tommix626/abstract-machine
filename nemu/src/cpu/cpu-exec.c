@@ -31,7 +31,7 @@ uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
-void device_update();
+void device_update(); 
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
@@ -43,7 +43,8 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   bool stop_flag = true;
   check_watchpoint(&stop_flag);
   if (!stop_flag) {
-    panic("TODO: set NEMU State to STATE_STOP"); //TODO UPNEXT
+    nemu_state.state = NEMU_STOP;
+    Log("program stop due to active watchpoint reached!");
   }
 
 }
@@ -104,7 +105,9 @@ void assert_fail_msg() {
   statistic();
 }
 
-/* Simulate how the CPU works. */
+/* Simulate how the CPU works.
+ * N steps of CPU execution.
+ */
 void cpu_exec(uint64_t n) {
   g_print_step = (n < MAX_INST_TO_PRINT);
   switch (nemu_state.state) {
@@ -116,12 +119,12 @@ void cpu_exec(uint64_t n) {
 
   uint64_t timer_start = get_time();
 
-  execute(n);
+  execute(n);//NOTE: exec cpu n step, break out early if nemu_state.state is changed from NEMU_RUNNING
 
   uint64_t timer_end = get_time();
   g_timer += timer_end - timer_start;
 
-  switch (nemu_state.state) {
+  switch (nemu_state.state) { //TODO: add case for dealling with nemu_stop (watchpoint and bp)
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
 
     case NEMU_END: case NEMU_ABORT:

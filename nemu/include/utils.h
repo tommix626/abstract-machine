@@ -28,7 +28,7 @@ typedef struct {
   uint32_t halt_ret;
 } NEMUState;
 
-extern NEMUState nemu_state;
+extern NEMUState nemu_state; //NOTE: this controls the state of our nemu simulator.
 
 // ----------- timer -----------
 
@@ -53,6 +53,8 @@ uint64_t get_time();
 #define ANSI_BG_CYAN    "\33[1;46m"
 #define ANSI_BG_WHITE   "\33[1;47m"
 #define ANSI_NONE       "\33[0m"
+
+#define ANSI_FG_YELLOW_THIN  "\33[0;33m" //for debugging
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 

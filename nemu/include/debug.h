@@ -24,6 +24,16 @@
     _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_BLUE) "\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__)
 
+//debug log
+#define DLog(format, ...) \
+    _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_YELLOW_THIN) "\n", \
+        __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+//warning log
+#define WLog(format, ...) \
+    _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_RED) "\n", \
+        __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+
+
 #define Assert(cond, format, ...) \
   do { \
     if (!(cond)) { \

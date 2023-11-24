@@ -99,7 +99,7 @@ static int nr_token __attribute__((used))  = 0;
 static void print_token(int start, int end){
   for (int i = start; i <= end; i++)
   {
-    printf("%s(type:%d)  ", tokens[i].str, tokens[i].type);
+    printf("%s%s(type:%d)  ", ANSI_FG_YELLOW_THIN,tokens[i].str, tokens[i].type);
   }
   printf("\n\n");
   
@@ -124,7 +124,7 @@ static bool make_token(char *e) {
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;
-        // printf("position=%d\n",position); //DEBUG
+        // DLog("position=%d\n",position); //DEBUG
         /* TODO(DONE): Now a new token is recognized with rules[i]. Add codes
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
@@ -150,7 +150,7 @@ static bool make_token(char *e) {
     }
 
     if (i == NR_REGEX) {
-      printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
+      WLog("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
       return false;
     }
   }
@@ -268,7 +268,7 @@ word_t dereference(paddr_t addr, bool *success) {
   return paddr_read(addr,4); //4: reading 32-bit addr
 }
 word_t evaluate_expression(int p, int q, bool *success) {
-  printf("eval from %d to %d\n", p,q); //debug
+  DLog("eval from %d to %d\n", p,q); //debug
   // print_token(p, q); //DEBUG
   if (*success == false) {
     return 0;
@@ -357,7 +357,7 @@ word_t evaluate_expression(int p, int q, bool *success) {
       *success = false;
       combVal = 0;
   }
-  // printf("combine value=%u\n", combVal); //DEBUG
+  // DLog("combine value=%u\n", combVal); //DEBUG
   return combVal;
 }
 
@@ -367,7 +367,7 @@ word_t expr(char *e, bool *success) {
   memset(tokens, 0, sizeof(tokens));
   if (!make_token(e)) {
     *success = false;
-    printf("make token failed\n");
+    WLog("make token failed\n");
     return 0;
   }
   //decide if * represents dereference or multiplication

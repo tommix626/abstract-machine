@@ -74,7 +74,7 @@ static int cmd_info(char *args) {
   }
   else if (strcmp(arg,"w")==0){
     //TODO: watchpoint
-
+    print_watchpoint();
 
   }
   else {
@@ -219,12 +219,34 @@ static int cmd_w(char *args) {
     return 0;
   }
   //store to an idle wp
-  WP* idle = new_wp();
-  idle->old_value = expr_val;
+  WP* idle = new_wp(expr_val);
   strcpy(idle->str,args);
   // idle->str = args; //why not a good idea? should copy to local mem,
   Log("Watchpoint %d added for EXPR=%s, initial value=%u\n",idle->NO, idle->str, idle->old_value);
   return 0;
+}
+
+static int cmd_d(char *args) {
+  if (*args == '\0' || args == NULL) {
+    /* no argument given */
+    printf("Missing argument. usage: d [Watchpoint_Number] \n");
+    return 0;
+  }
+  char *arg1 = strtok(NULL, " ");
+	int N=0;
+	if (arg1 == NULL) {
+    /* no argument given */
+		panic("should not reach here!");
+  }
+  else {
+		/* convert arg into int */
+		bool flag = stringToInt(arg1,&N);
+		if (flag) {
+      free_wp(N);
+		}
+		else { printf("invalid argument '%s'\n", arg1);}
+	}
+	return 0;
 }
 
 static struct {
@@ -241,7 +263,7 @@ static struct {
   { "x","N EXPR - scan N 4-byte memory starting at the place EXPR", cmd_x },
   { "p","EXPR - print expression", cmd_p },
   { "w","EXPR - set watchpoint", cmd_w },
-  // { "d","delete watchpoint", cmd_d },
+  { "d","delete watchpoint", cmd_d },
 
 };
 

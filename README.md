@@ -27,7 +27,9 @@ The following subprojects/components are included. Some of them are not fully im
 - nemu/src/monitor/sdb/sdb.c
 - ### support step run (`si [N]`), info register (`info r`), memory scanning (`x N ADDR_EXPR`).
 - ### support EXPR parsing with regex. (Arith Calculator!) Therefore support print command (`p EXPR`)
-    - tested in pa1.2
+    - added and tested in pa1.2
+- ### support watchpoint (`w EXPR`), info watchpoint (`info w`), delete watchpoint (`d N`)
+    - added in pa1.3
 
 ## pa1.2 implement a random unit test generator and test `sdb` commands on evaluating expression.
 - ### generating sequence of expression using recursion, deal with buffer overflow, zero division, and unsigned int problem. 
@@ -40,3 +42,6 @@ The following subprojects/components are included. Some of them are not fully im
     - nemu/src/monitor/sdb/sdb.c
 - ### set up watchpoint pool API using linkedlist implementation:
     - nemu/src/monitor/sdb/watchpoint.c
+- ### scan for watchpoint change in main and set NEMU state to STOP.
+    - nemu/src/cpu/cpu-exec.c
+    - add functions for printing and checking wp change in `nemu/src/monitor/sdb/watchpoint.c`.

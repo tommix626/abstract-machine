@@ -124,7 +124,7 @@ void cpu_exec(uint64_t n) {
   uint64_t timer_end = get_time();
   g_timer += timer_end - timer_start;
 
-  switch (nemu_state.state) { //TODO: add case for dealling with nemu_stop (watchpoint and bp)
+  switch (nemu_state.state) { //WHYNOT: add case for dealling with nemu_stop (watchpoint and bp) A: because the stop behavior is to fall through the cases and return.
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
 
     case NEMU_END: case NEMU_ABORT:

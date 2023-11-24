@@ -73,7 +73,6 @@ static int cmd_info(char *args) {
     isa_reg_display(); //rax            0x0                 0
   }
   else if (strcmp(arg,"w")==0){
-    //TODO: watchpoint
     print_watchpoint();
 
   }
@@ -257,7 +256,6 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  /* TODO: Add more commands */
   { "si", "[N] - Step through N times", cmd_si },
   { "info","rw - print information", cmd_info },
   { "x","N EXPR - scan N 4-byte memory starting at the place EXPR", cmd_x },

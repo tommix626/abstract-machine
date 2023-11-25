@@ -45,3 +45,7 @@ The following subprojects/components are included. Some of them are not fully im
 - ### scan for watchpoint change in main and set NEMU state to STOP.
     - nemu/src/cpu/cpu-exec.c
     - add functions for printing and checking wp change in `nemu/src/monitor/sdb/watchpoint.c`.
+- ### use Kconfig to control functionality.
+    - understand Kconfig and modify: `nemu/Kconfig`
+    - set up config entry for watchpoint function and debug output;
+    - change setting by running `make menuconfig` in `nemu/`.

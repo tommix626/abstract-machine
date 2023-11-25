@@ -278,6 +278,11 @@ bool check_parentheses(int p, int q) {
 }
 
 word_t dereference(paddr_t addr, bool *success) {
+  if(!addr){ // if dereferencing a null addr.
+    WLog("Dereferencing a null address");
+    *success = false;
+    return 666;
+  }
   return paddr_read(addr,4); //4: reading 32-bit addr
 }
 word_t evaluate_expression(int p, int q, bool *success) {
@@ -353,6 +358,7 @@ word_t evaluate_expression(int p, int q, bool *success) {
       if (val2 == 0) { // div by 0
         *success = false;
         combVal = 0;
+        WLog("division by zero error");
       }
       combVal = val1 / val2;
       break;

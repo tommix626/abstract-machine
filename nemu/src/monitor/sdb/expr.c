@@ -97,13 +97,26 @@ static int nr_token __attribute__((used))  = 0;
 
 /*DEBUG Function*/
 static void print_token(int start, int end){
+  char buffer[MAX_TOKEN_NUM]; //FIXME: might lead to error
+  buffer[0] = '\0';
+  char tokenbuf[320];
   for (int i = start; i <= end; i++)
   {
-    printf("%s%s(type:%d)  ", ANSI_FG_YELLOW_THIN,tokens[i].str, tokens[i].type);
+    snprintf(tokenbuf,sizeof(tokenbuf),"%s(type:%d) ",tokens[i].str, tokens[i].type);
+    strncat(buffer,tokenbuf,sizeof(buffer)-strlen(buffer)-1);
   }
-  printf("\n\n");
+  DLog("%s",buffer);
   
 }
+// /*DEBUG Function*/
+// static void print_token(int start, int end){
+//   for (int i = start; i <= end; i++)
+//   {
+//     printf("%s%s(type:%d)  ", ANSI_FG_YELLOW_THIN,tokens[i].str, tokens[i].type);
+//   }
+//   printf("\n\n");
+  
+// }
 
 static bool make_token(char *e) {
   int position = 0;
@@ -268,7 +281,7 @@ word_t dereference(paddr_t addr, bool *success) {
   return paddr_read(addr,4); //4: reading 32-bit addr
 }
 word_t evaluate_expression(int p, int q, bool *success) {
-  DLog("eval from %d to %d\n", p,q); //debug
+  DLog("eval from %d to %d", p,q); //debug
   // print_token(p, q); //DEBUG
   if (*success == false) {
     return 0;

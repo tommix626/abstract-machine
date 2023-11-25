@@ -191,6 +191,29 @@ config DIFFTEST_REF_NAME
   default "kvm" if DIFFTEST_REF_KVM
   default "spike" if DIFFTEST_REF_SPIKE
   default "none"
+
+# added config for disabling watchpoint
+config WATCHPOINT
+  bool "watchpoint"
+  default y
+  help
+    Enable watchpoint feature.
+    Note this will reduce the performance of NEMU.
+
+# added config for disabling debug log
+config DEBUG_LOG
+  bool "debug log"
+  default y
+  help
+    Enable debug log output.
+# added config for disabling warning log
+config WARNING_LOG
+  bool "warning log"
+  default y
+  help
+    Enable warning log output.
+    warning log are usually related to critical error.
+
 endmenu
 
 if MODE_SYSTEM

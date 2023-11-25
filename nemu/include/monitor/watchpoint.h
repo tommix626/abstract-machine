@@ -1,3 +1,6 @@
+#ifndef __WATCHPOINT_H__
+#define __WATCHPOINT_H__
+
 #include <monitor/sdb.h>
 
 #define NR_WP 32 //number of wp
@@ -22,3 +25,5 @@ void free_wp(int num);
 void check_watchpoint(bool* stop_flag);
 void print_watchpoint();
 WP *get_idle_wp();
+
+#endif

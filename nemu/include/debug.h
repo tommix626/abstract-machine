@@ -24,15 +24,27 @@
     _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_BLUE) "\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__)
 
-//debug log
-#define DLog(format, ...) \
-    _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_YELLOW_THIN) "\n", \
-        __FILE__, __LINE__, __func__, ## __VA_ARGS__)
-//warning log
-#define WLog(format, ...) \
-    _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_RED) "\n", \
-        __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+//if debug log is y in Kconfig
+#ifdef CONFIG_DEBUG_LOG
+  //debug log
+  #define DLog(format, ...) \
+      _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_YELLOW_THIN) "\n", \
+          __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+#else
+  //do nothing
+  #define DLog(format, ...)
+#endif
 
+//if warning log is y in Kconfig
+#ifdef CONFIG_WARNING_LOG
+  //warning log
+  #define WLog(format, ...) \
+      _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_RED) "\n", \
+          __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+#else
+  //do nothing
+  #define WLog(format, ...)
+#endif
 
 #define Assert(cond, format, ...) \
   do { \

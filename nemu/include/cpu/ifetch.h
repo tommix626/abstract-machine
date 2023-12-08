@@ -17,6 +17,10 @@
 
 #include <memory/vaddr.h>
 
+/// @brief fetch the bit string for the next instruction.
+/// @param pc start addr of the next instruction
+/// @param len the length of the next instruction
+/// @return 
 static inline uint32_t inst_fetch(vaddr_t *pc, int len) {
   uint32_t inst = vaddr_ifetch(*pc, len);
   (*pc) += len;

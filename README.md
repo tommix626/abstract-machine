@@ -52,7 +52,7 @@ The following subprojects/components are included. Some of them are not fully im
     - change setting by running `make menuconfig` in `nemu/`.
 
 
-# PA2 RISC-V bare-metal
+# PA2 RISC-V baremetal
 ## pa2.1 implement all RISC-V instruction set: include `RV32I` and `RV32M`
 - nemu/src/isa/riscv32/inst.c
 - ### support integer arithmetic through I and R instruction decoding.

@@ -52,11 +52,18 @@ The following subprojects/components are included. Some of them are not fully im
     - change setting by running `make menuconfig` in `nemu/`.
 
 
-# PA2 RISC-V baremetal
+# PA2 RISC-V bare-metal
 ## pa2.1 implement all RISC-V instruction set: include `RV32I` and `RV32M`
 - nemu/src/isa/riscv32/inst.c
-- ### support integer arithmetic through I and R instruction decoding.
-- ### support memory load and store through I/U and S instrucion decoding.
-- ### support jumping and branching through B and J/I instrucion decoding.
-- ### run a bunch of simple C program's object file through nemu and pass.
+- ### Read through risc-V inst set and implement every instruction:
+    - support integer arithmetic through I and R instruction decoding.
+    - support memory load and store through I/U and S instrucion decoding.
+    - support jumping and branching through B and J/I instrucion decoding.
+- ### Run a bunch of simple C program's object file through nemu and pass.
     - tests located in `am-kernels/tests/cpu-tests/tests`, and can be run though command: `make ARCH=riscv32-nemu ALL={test program without .c suffix} run`
+- ### Abstract-machine lib function
+    - look through man pages and implement string functions: `strlen`, `strcpy`, `strncpy`, `strcat`, `strcmp`, `strncmp`; (`abstract-machine/klib/src/string.c`)
+    - memory functions: `memset`, `memmove`, `memcmp`, `memcpy`; (`abstract-machine/klib/src/string.c`)
+    - print functions: `sprintf`. (`abstract-machine/klib/src/stdio.c`)
+
+    

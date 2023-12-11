@@ -38,7 +38,7 @@ void device_update();
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); } //write to log under condition: TODO
+  if (CONFIG_ITRACE_COND) { log_write("%s\n", _this->logbuf); } //write to log under condition: TODO
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); } //write to stdout under condition
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));

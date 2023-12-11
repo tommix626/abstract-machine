@@ -66,4 +66,10 @@ The following subprojects/components are included. Some of them are not fully im
     - memory functions: `memset`, `memmove`, `memcmp`, `memcpy`; (`abstract-machine/klib/src/string.c`)
     - print functions: `sprintf`. (`abstract-machine/klib/src/stdio.c`)
 
-    
+## pa2.2 tracing (Infrastructure part 2)
+- ### set up Instruction Ring Buffer and integrate into sdb:
+    - nemu/src/monitor/sdb/iringbuf.c
+    - nemu/include/monitor/iringbuf.h
+- ### add Memory Trace function and enabling control through Kconfig:
+    - nemu/src/memory/paddr.c
+    - nemu/Kconfig

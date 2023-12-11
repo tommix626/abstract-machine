@@ -24,6 +24,9 @@ static uint8_t *pmem = NULL;
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 
+
+#define MTRACE_COND (0x80000000<=addr && addr<=0x8000000c)
+
 //guest is the abstract machine; host is the physical computer. Inner function, should use the apis below.
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
@@ -56,6 +59,12 @@ void init_mem() {
  #### Equal to the * operator of the virtual program running on nemu.
 */
 word_t paddr_read(paddr_t addr, int len) { 
+#ifdef CONFIG_MTRACE
+  #ifdef CONFIG_MTRACE_COND
+  if (MTRACE_COND) //single line if statement fall through
+  #endif
+  DLog("read paddr: %#x for %d byte\n", addr, len);
+#endif
   if (likely(in_pmem(addr))) return pmem_read(addr, len);
   IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
   out_of_bound(addr);
@@ -63,6 +72,13 @@ word_t paddr_read(paddr_t addr, int len) {
 }
 
 void paddr_write(paddr_t addr, int len, word_t data) {
+#ifdef CONFIG_MTRACE
+  #ifdef CONFIG_MTRACE_COND
+  if (MTRACE_COND) //single line if statement fall through
+  #endif
+  DLog("write paddr: %#x for %d byte with data %u\n", addr, len, data);
+  
+#endif
   if (likely(in_pmem(addr))) { pmem_write(addr, len, data); return; }
   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
   out_of_bound(addr);

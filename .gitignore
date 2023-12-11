@@ -8,5 +8,6 @@
 !Makefile
 !README.md
 !.gitignore
+!.gitmodules
 !init.sh
 !/am-kernels/**

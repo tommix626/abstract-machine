@@ -9,5 +9,5 @@
 !README.md
 !.gitignore
 !init.sh
-!/am-kernels/*
-!/abstract-machine/*
+!/am-kernels
+!/abstract-machine

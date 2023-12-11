@@ -17,7 +17,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
 /// @param dst destination buffer.
 /// @param d integer to be converted.
 /// @return the number of digits of the int `d`.
-int int_to_backstr(char* dst,int d) {
+static int int_to_backstr(char* dst,int d) {
   int cnt=0;
   while (d) {
     *dst++ = (char)(d%10+(int)'0'); 

@@ -18,27 +18,34 @@
 #include <cpu/difftest.h>
 #include <locale.h>
 #include <monitor/watchpoint.h> //for watchpoint
+#include <monitor/iringbuf.h> //for iringbuf
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
  * You can modify this value as you want.
  */
-#define MAX_INST_TO_PRINT 10
+#define MAX_INST_TO_PRINT 100
 
 CPU_state cpu = {}; //NOTE: this is the core cpu, with .reg (storing register val) and .pc  
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
+
+
 void device_update(); 
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
+  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); } //write to log under condition: TODO
 #endif
-  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
+  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); } //write to stdout under condition
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
+  
+  //iringbuf update TODO1
+  IFDEF(CONFIG_ITRACE, iringbuf_add(_this->logbuf));
+
   //watchpoint
 #ifdef CONFIG_WATCHPOINT
   bool stop_flag = true;
@@ -58,14 +65,14 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->snpc = pc;
   isa_exec_once(s);
   cpu.pc = s->dnpc;
-#ifdef CONFIG_ITRACE
+#ifdef CONFIG_ITRACE //NOTE: this section outputs the itrace command to s->logbuf during the execution. Later, the function trace_and_difftest will sprintf logbuf to log file and stdout.
   char *p = s->logbuf;
-  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
-  int ilen = s->snpc - s->pc;
+  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc); //NOTE: print pc value to buffer p (s->logbuf)
+  int ilen = s->snpc - s->pc; //NOTE: length of instruction
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;
   for (i = ilen - 1; i >= 0; i --) {
-    p += snprintf(p, 4, " %02x", inst[i]);
+    p += snprintf(p, 4, " %02x", inst[i]); //NOTE: print byte in Hex for the instruction.
   }
   int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
   int space_len = ilen_max - ilen;
@@ -74,7 +81,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   memset(p, ' ', space_len);
   p += space_len;
 
-#ifndef CONFIG_ISA_loongarch32r
+#ifndef CONFIG_ISA_loongarch32r //NOTE: disassemble using llvm and print to buffer p.
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
@@ -137,6 +144,7 @@ void cpu_exec(uint64_t n) {
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
+      iringbuf_print();
       // fall through
     case NEMU_QUIT: statistic();
   }

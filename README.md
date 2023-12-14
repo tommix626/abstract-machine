@@ -73,3 +73,10 @@ The following subprojects/components are included. Some of them are not fully im
 - ### add Memory Trace function and enabling control through Kconfig:
     - nemu/src/memory/paddr.c
     - nemu/Kconfig
+- ### add Function Tracing:
+    - **add `-e` argument to main to parse elf file, modify makefile to load elf file**
+        - abstract-machine/scripts/platform/nemu.mk
+        - nemu/src/monitor/monitor.c
+    - **detect function calling and return with `jal` and `jalr` instruction, and print trace appropiately**
+        - nemu/src/isa/riscv32/inst.c
+    - **modify Kconfig to add option on opening ftrace**

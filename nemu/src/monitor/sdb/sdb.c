@@ -181,7 +181,7 @@ static int cmd_x(char *args) {
 }
 
 static int cmd_p(char *args) {
-  if (*args == '\0' || args == NULL) {
+  if (args == NULL || *args == '\0') {
     /* no argument given */
     printf("Missing argument. usage: p [EXPR] \n");
     return 0;
@@ -204,7 +204,7 @@ static int cmd_p(char *args) {
 /// @param args EXPR
 ///             N - number to 4-byte to be evaluate
 static int cmd_w(char *args) {
-  if (*args == '\0' || args == NULL) {
+  if (args == NULL || *args == '\0') {
     /* no argument given */
     printf("Missing argument. usage: w [EXPR] \n");
     return 0;
@@ -227,7 +227,7 @@ static int cmd_w(char *args) {
 }
 
 static int cmd_d(char *args) {
-  if (*args == '\0' || args == NULL) {
+  if (args == NULL || *args == '\0') {
     /* no argument given */
     printf("Missing argument. usage: d [Watchpoint_Number] \n");
     return 0;

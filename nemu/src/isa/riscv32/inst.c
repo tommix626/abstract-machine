@@ -53,9 +53,9 @@ typedef struct function_entity
   uint64_t size;
 } FuncInfo; //repetition in isa.h FIXME
 //ftrace
-FuncInfo ftable[100];
+FuncInfo ftable[1000];
 int fnum;
-char padding[100]; // seq of spaces
+char padding[1000]; // seq of spaces
 
 static char* fetch_func_name(vaddr_t addr) {
   for (int i = 0; i < fnum; i++)
@@ -69,25 +69,18 @@ static char* fetch_func_name(vaddr_t addr) {
 //print ftrace command
 static void ftrace(char *name, Decode *s, int rd, word_t src1, word_t imm) {
   if(0==strcmp(name,"jal")) {
-    if(rd == 0) {
-      char* fname = fetch_func_name(s->pc);
-      DLog("%spc:>%#x return %s",padding,s->pc,fname);
-      padding[strlen(padding)-1] = '\0';
-    }
-    else {
-      vaddr_t target_addr = s->pc+imm;
-      char* fname = fetch_func_name(target_addr);
-      DLog("%spc:>%#x call %s@%#x",padding,s->pc,fname,target_addr);
-      strcat(padding," ");
-     }
+    vaddr_t target_addr = s->pc+imm;
+    char* fname = fetch_func_name(target_addr);
+    DLog("%spc:>%#x call %s@%#x",padding,s->pc,fname,target_addr);
+    strcat(padding," ");
   }
   else if(0==strcmp(name,"jalr")) {
-    if(rd == 0) {
+    if(rd == 0 && imm == 0 && src1 == R(1)) {
       char* fname = fetch_func_name(s->pc);
       DLog("%spc:>%#x return %s",padding,s->pc,fname);
       padding[strlen(padding)-1] = '\0';
     }
-    else {
+    else if(rd == 1) {
       vaddr_t target_addr = src1+imm;
       char* fname = fetch_func_name(target_addr);
       DLog("%spc:>%#x call %s@%#x",padding,s->pc,fname,target_addr);

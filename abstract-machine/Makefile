@@ -1,5 +1,12 @@
 # Makefile for AbstractMachine Kernels and Libraries
 
+### NOTE: set up SRC and ARCH and then include this makefile.
+### this file -include $(AM_HOME)/scripts/$(ARCH).mk (line 99~), and let make run fall through. 
+### That Makefile include further mk located in $(AM_HOME)/scripts/platform & ..../isa, in the platform one, there's the run target
+### run target there dep on image, which is the target $(IMAGE).elf, then it uses the rules in this file, to build SRCS and LIBS first $(IMAGE).elf: $(OBJS) am $(LIBS) (line 137~)
+### the OBJS are build from the SRCS (line 66~)
+### LIBS currently seems like an external reference, possibly also defined before including this makefile.
+
 ### *Get a more readable version of this Makefile* by `make html` (requires python-markdown)
 html:
 	cat Makefile | sed 's/^\([^#]\)/    \1/g' | markdown_py > Makefile.html
@@ -93,7 +100,7 @@ LDFLAGS  += -z noexecstack
 
 ## 4. Arch-Specific Configurations
 
-### Paste in arch-specific configurations (e.g., from `scripts/x86_64-qemu.mk`)
+### Paste in arch-specific configurations (e.g., from `scripts/x86_64-qemu.mk`) this include the real run target!!!
 -include $(AM_HOME)/scripts/$(ARCH).mk
 
 ### Fall back to native gcc/binutils if there is no cross compiler

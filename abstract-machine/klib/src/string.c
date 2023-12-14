@@ -23,6 +23,7 @@ char *strcpy(char *dst, const char *src) {
   return dst;
 }
 
+//might not end with '\0'!
 char *strncpy(char *dst, const char *src, size_t n) {
   char *dptr = dst;
   while(n-- > 0) {

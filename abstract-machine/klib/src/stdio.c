@@ -6,10 +6,10 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-int printf(const char *fmt, ...) {
-  panic("Don't know where is stdout!")
-  // sprintf(stdout,fmt);
-}
+// int printf(const char *fmt, ...) {
+//   panic("Don't know where is stdout!");
+//   // sprintf(stdout,fmt);
+// }
 
 /// @brief fill the dst buffer with digits of int, in backward fashion
 /// @param dst destination buffer.

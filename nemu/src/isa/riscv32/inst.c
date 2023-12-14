@@ -61,30 +61,32 @@ static char* fetch_func_name(vaddr_t addr) {
   for (int i = 0; i < fnum; i++)
   {
     FuncInfo f = ftable[i];
-    if(f.start <= addr && addr <= (f.start+f.size)) {return ftable[i].name;}
+    if(f.start <= addr && addr < (f.start+f.size)) {return ftable[i].name;}
   }
   panic("should ot reach here");
 }
 
+#define PADDING_SYMBOL "| "
+#define PADDING_SYMBOL_LEN strlen(PADDING_SYMBOL)
 //print ftrace command
 static void ftrace(char *name, Decode *s, int rd, word_t src1, word_t imm) {
-  if(0==strcmp(name,"jal")) {
+  if(0==strcmp(name,"jal") && rd == 1) {
     vaddr_t target_addr = s->pc+imm;
     char* fname = fetch_func_name(target_addr);
     DLog("%spc:>%#x call %s@%#x",padding,s->pc,fname,target_addr);
-    strcat(padding," ");
+    strcat(padding,PADDING_SYMBOL);
   }
   else if(0==strcmp(name,"jalr")) {
     if(rd == 0 && imm == 0 && src1 == R(1)) {
       char* fname = fetch_func_name(s->pc);
+      padding[strlen(padding)-strlen(PADDING_SYMBOL)] = '\0';
       DLog("%spc:>%#x return %s",padding,s->pc,fname);
-      padding[strlen(padding)-1] = '\0';
     }
     else if(rd == 1) {
       vaddr_t target_addr = src1+imm;
       char* fname = fetch_func_name(target_addr);
       DLog("%spc:>%#x call %s@%#x",padding,s->pc,fname,target_addr);
-      strcat(padding," ");
+      strcat(padding,PADDING_SYMBOL);
      }
   }
 }

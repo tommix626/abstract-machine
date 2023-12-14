@@ -71,26 +71,26 @@ static void ftrace(char *name, Decode *s, int rd, word_t src1, word_t imm) {
   if(0==strcmp(name,"jal")) {
     if(rd == 0) {
       char* fname = fetch_func_name(s->pc);
-      DLog("%s return %s",padding,fname);
+      DLog("%spc:>%#x return %s",padding,s->pc,fname);
       padding[strlen(padding)-1] = '\0';
     }
     else {
       vaddr_t target_addr = s->pc+imm;
       char* fname = fetch_func_name(target_addr);
-      DLog("%s call %s@%#x",padding,fname,target_addr);
+      DLog("%spc:>%#x call %s@%#x",padding,s->pc,fname,target_addr);
       strcat(padding," ");
      }
   }
   else if(0==strcmp(name,"jalr")) {
     if(rd == 0) {
       char* fname = fetch_func_name(s->pc);
-      DLog("%s return %s",padding,fname);
+      DLog("%spc:>%#x return %s",padding,s->pc,fname);
       padding[strlen(padding)-1] = '\0';
     }
     else {
       vaddr_t target_addr = src1+imm;
       char* fname = fetch_func_name(target_addr);
-      DLog("%s call %s@%#x",padding,fname,target_addr);
+      DLog("%spc:>%#x call %s@%#x",padding,s->pc,fname,target_addr);
       strcat(padding," ");
      }
   }
@@ -103,7 +103,7 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
   int rs1 = BITS(i, 19, 15);
   int rs2 = BITS(i, 24, 20);
   *rd     = BITS(i, 11, 7);
-  DLog("Decode operand result: rd rs1 rs2 = %#x %#x %#x",*rd,rs1,rs2);
+  // DLog("Decode operand result: rd rs1 rs2 = %#x %#x %#x",*rd,rs1,rs2);
   switch (type) {
     case TYPE_I: src1R();          immI(); break;
     case TYPE_U:                   immU(); break;
@@ -124,7 +124,7 @@ static int decode_exec(Decode *s) {
 #define INSTPAT_MATCH(s, name, type, ... /* execute body */ ) { \
   decode_operand(s, &rd, &src1, &src2, &imm, concat(TYPE_, type)); \
   IFDEF(CONFIG_FTRACE,ftrace(name,s,rd,src1,imm)); \
-  DLog("start internal inst exec");__VA_ARGS__ ; DLog("inst exec end");\
+  __VA_ARGS__ ;\
 }
 
   INSTPAT_START();
@@ -132,7 +132,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? ??? ????? 01101 11", "lui"  , U, R(rd) = imm);
 
   /*Integer Arithmetic*/
-  INSTPAT("0000000 ????? ????? 000 ????? 01100 11", "add"   , R, DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm);  R(rd) = src1 + src2);
+  INSTPAT("0000000 ????? ????? 000 ????? 01100 11", "add"   , R, /*DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm);*/  R(rd) = src1 + src2);
   INSTPAT("0100000 ????? ????? 000 ????? 01100 11", "sub"   , R, R(rd) = src1 - src2);
   INSTPAT("0000000 ????? ????? 100 ????? 01100 11", "xor"   , R, R(rd) = src1 ^ src2);
   INSTPAT("0000000 ????? ????? 110 ????? 01100 11", "or"    , R, R(rd) = src1 | src2);
@@ -165,16 +165,16 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 101 ????? 00000 11", "lhu"    , I, R(rd) = Mr(src1 + imm, 2)); //example word_t is unsigned
 
   /*branching*/
-  INSTPAT("??????? ????? ????? 000 ????? 11000 11", "beq"    , B ,  DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm); if((sword_t)src1==(sword_t)src2) s->dnpc=s->pc+imm );
-  INSTPAT("??????? ????? ????? 001 ????? 11000 11", "bne"    , B ,  DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm); if((sword_t)src1!=(sword_t)src2) s->dnpc=s->pc+imm );
-  INSTPAT("??????? ????? ????? 100 ????? 11000 11", "blt"    , B ,  DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm); if((sword_t)src1 < (sword_t)src2) s->dnpc=s->pc+imm );
-  INSTPAT("??????? ????? ????? 101 ????? 11000 11", "bge"    , B ,  DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm); if((sword_t)src1>=(sword_t)src2) s->dnpc=s->pc+imm );
-  INSTPAT("??????? ????? ????? 110 ????? 11000 11", "bltu"   , B ,  DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm); if(src1<src2) s->dnpc=s->pc+imm ); //zero extended unsign
-  INSTPAT("??????? ????? ????? 111 ????? 11000 11", "bgeu"   , B ,  DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm); if(src1>=src2) s->dnpc=s->pc+imm ); //zero extended
+  INSTPAT("??????? ????? ????? 000 ????? 11000 11", "beq"    , B ,  /*DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm);*/ if((sword_t)src1==(sword_t)src2) s->dnpc=s->pc+imm );
+  INSTPAT("??????? ????? ????? 001 ????? 11000 11", "bne"    , B ,  if((sword_t)src1!=(sword_t)src2) s->dnpc=s->pc+imm );
+  INSTPAT("??????? ????? ????? 100 ????? 11000 11", "blt"    , B ,  if((sword_t)src1 < (sword_t)src2) s->dnpc=s->pc+imm );
+  INSTPAT("??????? ????? ????? 101 ????? 11000 11", "bge"    , B ,  if((sword_t)src1>=(sword_t)src2) s->dnpc=s->pc+imm );
+  INSTPAT("??????? ????? ????? 110 ????? 11000 11", "bltu"   , B ,  if(src1<src2) s->dnpc=s->pc+imm ); //zero extended unsign
+  INSTPAT("??????? ????? ????? 111 ????? 11000 11", "bgeu"   , B ,  if(src1>=src2) s->dnpc=s->pc+imm ); //zero extended
 
   /*Jumping*/
-  INSTPAT("??????? ????? ????? ??? ????? 11011 11", "jal"    , J ,  DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm); R(rd) = s->pc + 4; s->dnpc=s->pc+imm );
-  INSTPAT("??????? ????? ????? 000 ????? 11001 11", "jalr"   , I, DLog("pc=%#x imm=%#x",(int)s->pc,(int)imm); R(rd) = s->pc + 4; s->dnpc=src1+imm); /*this is I decoding*/
+  INSTPAT("??????? ????? ????? ??? ????? 11011 11", "jal"    , J ,  R(rd) = s->pc + 4; s->dnpc=s->pc+imm );
+  INSTPAT("??????? ????? ????? 000 ????? 11001 11", "jalr"   , I ,  R(rd) = s->pc + 4; s->dnpc=src1+imm); /*this is I decoding*/
 
   /*Multiply Extension*/
   INSTPAT("0000001 ????? ????? 000 ????? 01100 11", "mul"  , R, R(rd) = ((sword_t)src1 * (sword_t)src2) & 0xffffffff);

@@ -90,15 +90,19 @@ static bool load_elf() {
     return EXIT_FAILURE; // built-in image size
   }
 
-
+  DLog("ELF file: %s",elf_file);
   FILE *fp = fopen(elf_file, "rb");
 
-  Elf64_Ehdr header;
+  Elf32_Ehdr header;
+  // WLog("%lu\n",fread(&header, 1, sizeof(header), fp));
+  DLog("sizeof(header)=%ld",sizeof(header));
+  // DLog("NUMBER of Functions:%u",header.e_shnum);
   if (fread(&header, 1, sizeof(header), fp) != sizeof(header)) {
     WLog("Error reading ELF header");
     fclose(fp);
     return EXIT_FAILURE;
   }
+  DLog("NUMBER of Functions:%u",header.e_shnum);
 
   if (memcmp(header.e_ident, ELFMAG, SELFMAG) != 0) {
     fprintf(stderr, "Not an ELF file\n");
@@ -107,9 +111,9 @@ static bool load_elf() {
   }
 
   // Read section headers
-  Elf64_Shdr *shdrs = (Elf64_Shdr *)malloc(header.e_shnum * sizeof(Elf64_Shdr));
+  Elf32_Shdr *shdrs = (Elf32_Shdr *)malloc(header.e_shnum * sizeof(Elf32_Shdr));
   fseek(fp, header.e_shoff, SEEK_SET);
-  if (fread(shdrs, sizeof(Elf64_Shdr), header.e_shnum, fp) != header.e_shnum) {
+  if (fread(shdrs, sizeof(Elf32_Shdr), header.e_shnum, fp) != header.e_shnum) {
     WLog("Error reading section headers");
     free(shdrs);
     fclose(fp);
@@ -117,20 +121,22 @@ static bool load_elf() {
   }
 
   // string table and symbol table
-  Elf64_Shdr *strtab_shdr = &shdrs[header.e_shstrndx];
+  Elf32_Shdr *strtab_shdr = &shdrs[header.e_shstrndx];
 
-  Elf64_Shdr *symtab_shdr = NULL;
+  Elf32_Shdr *symtab_shdr = NULL;
   for (int i = 0; i < header.e_shnum; i++) {
     // printf("%d\n",shdrs[i].sh_type);
     if (shdrs[i].sh_type == SHT_SYMTAB) {
       symtab_shdr = &shdrs[i];
-      printf("Symbol Table (.symtab) found at offset: 0x%lx\n", symtab_shdr->sh_offset);
+      printf("Symbol Table (.symtab) found at offset: 0x%x\n", symtab_shdr->sh_offset);
     }
   }
   if (symtab_shdr) {
     strtab_shdr = &shdrs[symtab_shdr->sh_link]; // sh_link points to the .strtab section
-    printf("String Table (.strtab) found at offset: 0x%lx\n", strtab_shdr->sh_offset);
+    printf("String Table (.strtab) found at offset: 0x%x\n", strtab_shdr->sh_offset);
   }
+  
+  DLog("STRTAB SIZE:%u",strtab_shdr->sh_size);
   char *strtab = (char *)malloc(strtab_shdr->sh_size);
   fseek(fp, strtab_shdr->sh_offset, SEEK_SET);
   if (fread(strtab, 1, strtab_shdr->sh_size, fp) != strtab_shdr->sh_size) {
@@ -149,7 +155,7 @@ static bool load_elf() {
     return EXIT_FAILURE;
   }
 
-  Elf64_Sym *symbols = (Elf64_Sym *)malloc(symtab_shdr->sh_size);
+  Elf32_Sym *symbols = (Elf32_Sym *)malloc(symtab_shdr->sh_size);
   fseek(fp, symtab_shdr->sh_offset, SEEK_SET);
   if (fread(symbols, 1, symtab_shdr->sh_size, fp) != symtab_shdr->sh_size) {
     WLog("Error reading symbol table");
@@ -166,7 +172,7 @@ static bool load_elf() {
   fnum = 0; padding[0] = '\0';
 
   // Save symbols to ftable
-  size_t num_symbols = symtab_shdr->sh_size / sizeof(Elf64_Sym);
+  size_t num_symbols = symtab_shdr->sh_size / sizeof(Elf32_Sym);
   for (size_t i = 0; i < num_symbols; i++) {
     if (ELF64_ST_TYPE(symbols[i].st_info) == STT_FUNC) {  // Check if it's a function
       FuncInfo f;
@@ -174,7 +180,7 @@ static bool load_elf() {
       strcpy(f.name,&strtab[symbols[i].st_name]);
       f.size = symbols[i].st_size;
       ftable[fnum++] = f;
-      printf("size:%ld, Function name: %s, Address: 0x%lx\n", symbols[i].st_size, &strtab[symbols[i].st_name], symbols[i].st_value);
+      printf("size:%d, Function name: %s, Address: 0x%x\n", symbols[i].st_size, &strtab[symbols[i].st_name], symbols[i].st_value);
     }
   }
   

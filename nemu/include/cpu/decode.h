@@ -91,7 +91,7 @@ finish:
   uint64_t key, mask, shift; \
   pattern_decode(pattern, STRLEN(pattern), &key, &mask, &shift); \
   if ((((uint64_t)INSTPAT_INST(s) >> shift) & mask) == key) { \
-    DLog("%#x match pattern:%s DECODES: key=%#x mask=%#x shift=%#x",INSTPAT_INST(s), pattern, (int)key, (int)mask, (int)shift); /*debug info*/ \
+    /*DLog("%#x match pattern:%s DECODES: key=%#x mask=%#x shift=%#x",INSTPAT_INST(s), pattern, (int)key, (int)mask, (int)shift); debug info*/ \
     INSTPAT_MATCH(s, ##__VA_ARGS__); /*decode operand*/  \
     goto *(__instpat_end); \
   } \

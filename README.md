@@ -64,7 +64,7 @@ The following subprojects/components are included. Some of them are not fully im
 - ### Abstract-machine lib function
     - look through man pages and implement string functions: `strlen`, `strcpy`, `strncpy`, `strcat`, `strcmp`, `strncmp`; (`abstract-machine/klib/src/string.c`)
     - memory functions: `memset`, `memmove`, `memcmp`, `memcpy`; (`abstract-machine/klib/src/string.c`)
-    - print functions: `sprintf`. (`abstract-machine/klib/src/stdio.c`)
+    - print functions: `sprintf`,`vsprintf`,`snprintf`,`vsnprintf`. (`abstract-machine/klib/src/stdio.c`)
 
 ## pa2.2 tracing (Infrastructure part 2)
 - ### set up Instruction Ring Buffer and integrate into sdb:
@@ -80,3 +80,6 @@ The following subprojects/components are included. Some of them are not fully im
     - **detect function calling and return with `jal` and `jalr` instruction, and print trace appropiately**
         - nemu/src/isa/riscv32/inst.c
     - **modify Kconfig to add option on opening ftrace**
+- ### klib testing:
+    - add folder for klib testing: `am-kernels/tests/klib-tests`.
+    - write testcase for klib functions, and test on native.

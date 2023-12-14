@@ -12,7 +12,7 @@ int rand(void) {
 }
 
 void srand(unsigned int seed) {
-  next = seed;
+  next = seed; //NOTE: unexpectedly easy
 }
 
 int abs(int x) {

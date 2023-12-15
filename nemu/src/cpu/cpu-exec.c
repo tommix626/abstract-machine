@@ -43,7 +43,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); } //write to stdout under condition
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   
-  //iringbuf update TODO1
+  //iringbuf update
   IFDEF(CONFIG_ITRACE, iringbuf_add(_this->logbuf));
 
   //watchpoint

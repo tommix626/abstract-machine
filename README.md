@@ -82,4 +82,9 @@ The following subprojects/components are included. Some of them are not fully im
     - **modify Kconfig to add option on opening ftrace**
 - ### klib testing:
     - add folder for klib testing: `am-kernels/tests/klib-tests`.
-    - write testcase for klib functions, and test on native.
+    - write testsuite for klib functions, and test on native. 
+        - am-kernels/tests/klib-tests/src/tests/test_memory.c
+        - am-kernels/tests/klib-tests/src/tests/test_string.c
+        - am-kernels/tests/klib-tests/src/tests/test_printf.c
+        - am-kernels/tests/klib-tests/src/tests/test_test_setup.c
+    

@@ -16,10 +16,22 @@
 /// @param d integer to be converted.
 /// @return the number of digits of the int `d`.
 static int int_to_backstr(char* dst,int d) {
-  int cnt=0;
+  if(d == 0) {
+    *dst='0';
+    return 1;
+  }
+  int cnt = 0; 
+  bool negflag = d<0;
+  if(negflag) {
+    d = -d;
+  }
   while (d) {
-    *dst++ = (char)(d%10+(int)'0'); 
-    d/=10; cnt++;
+    *dst = (char)(d%10+(int)'0');
+    d/=10; cnt++;dst++;
+  }
+
+  if(negflag) {
+    *dst++ = '-';cnt++;
   }
   return cnt;
 }
@@ -44,6 +56,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             while (int_num-->0)
             {
               *out++ = int_str[int_num];
+              // printf("DEBUG: vsprintf putchar:%c\n",int_str[int_num]);
               cnt++;
             }
             break;

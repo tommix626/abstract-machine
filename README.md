@@ -87,4 +87,7 @@ The following subprojects/components are included. Some of them are not fully im
         - am-kernels/tests/klib-tests/src/tests/test_string.c
         - am-kernels/tests/klib-tests/src/tests/test_printf.c
         - am-kernels/tests/klib-tests/src/tests/test_test_setup.c
+- ### DIFF test:
+    - nemu/src/isa/riscv32/difftest/dut.c
+    - add differential testing for nemu,comparing with REF spike. Comparing only register each step!
     

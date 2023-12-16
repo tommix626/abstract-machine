@@ -30,7 +30,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
       WLog("Difference in register x%d(%s), DUT Value = %d [%#x] REF Value = %d[%#x]",i,reg_name(i),cpu.gpr[i],cpu.gpr[i],ref_r->gpr[i],ref_r->gpr[i]);
     }
   }
-
+  
   if(!status) {
     WLog("Diff Test Failed at pc = %#x",pc);
   }

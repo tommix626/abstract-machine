@@ -5,10 +5,21 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
+static char printf_buf[1000];
+
 int printf(const char *fmt, ...) {
   // WLog("Don't know where is stdout!");
-  return 0;
-  // sprintf(stdout,fmt);
+  va_list ap;
+  va_start(ap, fmt);
+  int cnt = vsprintf(printf_buf,fmt,ap);
+  va_end(ap);
+
+  for (const char *p = printf_buf; *p; p++) {
+    putch(*p);
+  }
+
+  return cnt;
+  // return 0;
 }
 
 /// @brief fill the dst buffer with digits of int, in backward fashion
@@ -21,12 +32,16 @@ static int int_to_backstr(char* dst,int d) {
     return 1;
   }
   int cnt = 0; 
-  bool negflag = d<0;
+  bool negflag = (d < 0);
   if(negflag) {
     d = -d;
+    // putch('@');
   }
+
   while (d) {
     *dst = (char)(d%10+(int)'0');
+    // putch('#'); putch((char)(d%10+(int)'0')); putch(*dst); putch('#'); 
+    // assert(*dst<=(int)'9' && *dst>=(int)'0');
     d/=10; cnt++;dst++;
   }
 
@@ -56,7 +71,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             while (int_num-->0)
             {
               *out++ = int_str[int_num];
-              // printf("DEBUG: vsprintf putchar:%c\n",int_str[int_num]);
+              printf("DEBUG: vsprintf output:%c\n",int_str[int_num]);
               cnt++;
             }
             break;

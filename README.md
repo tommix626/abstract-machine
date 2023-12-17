@@ -90,4 +90,7 @@ The following subprojects/components are included. Some of them are not fully im
 - ### DIFF test:
     - nemu/src/isa/riscv32/difftest/dut.c
     - add differential testing for nemu,comparing with REF spike. Comparing only register each step!
-    
+
+## pa2.3 IO device
+- ### read source code, fix bug in printf when invoking nemu putch.
+- ### timer

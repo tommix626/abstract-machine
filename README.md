@@ -93,4 +93,4 @@ The following subprojects/components are included. Some of them are not fully im
 
 ## pa2.3 IO device
 - ### read source code, fix bug in printf when invoking nemu putch.
-- ### timer
+- ### implement timer device. Understand AM abstraction level better.

@@ -66,7 +66,7 @@ word_t paddr_read(paddr_t addr, int len) {
   DLog("read paddr: %#x for %d byte\n", addr, len);
 #endif
   if (likely(in_pmem(addr))) return pmem_read(addr, len); //NOTE: normal memory access.
-  IFDEF(CONFIG_DEVICE, return mmio_read(addr, len)); //NOTE: access device IO memory access.
+  IFDEF(CONFIG_DEVICE, return mmio_read(addr, len)); //NOTE: access device IO memory access. mmio_read())->map_read()->host_read();
   out_of_bound(addr);
   return 0;
 }

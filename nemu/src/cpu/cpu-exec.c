@@ -56,7 +56,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
     Log("program stop due to active watchpoint reached!");
   }
   #else
-  WLog("Watchpoint is disabled! enable it in Kconfig");
+  // WLog("Watchpoint is disabled! enable it in Kconfig");
 #endif
 }
 

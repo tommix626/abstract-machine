@@ -61,7 +61,7 @@ void init_map() {
 }
 
 /// @brief  read len byte in map.
-/// @param addr read starting addr (addr is paddr/guest's phy addr)
+/// @param addr read starting addr (addr is paddr/guest's phy addr) [function will translate phy addr to host addr.]
 /// @param len read length. sould be integer between 1 and 8;
 /// @param map defines a mapping for a specific io_device;
 /// @return data of type word_t
@@ -69,7 +69,7 @@ word_t map_read(paddr_t addr, int len, IOMap *map) {
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
   paddr_t offset = addr - map->low;
-  invoke_callback(map->callback, offset, len, false); // prepare data to read
+  invoke_callback(map->callback, offset, len, false); // ask ioe prepare data to read
   word_t ret = host_read(map->space + offset, len);
   return ret;
 }

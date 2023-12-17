@@ -38,6 +38,8 @@ static uint64_t get_time_internal() {
   return us;
 }
 
+/// @brief get the current machine time
+/// @return the us time since the machine booted.
 uint64_t get_time() {
   if (boot_time == 0) boot_time = get_time_internal();
   uint64_t now = get_time_internal();

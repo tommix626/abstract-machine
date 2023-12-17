@@ -47,7 +47,7 @@ int    vsnprintf (char *str, size_t size, const char *format, va_list ap);
       if (!(cond)) { \
         printf("Assertion fail at %s:%d\n", __FILE__, __LINE__); \
         halt(1); \
-      } \
+      }\
     } while (0)
 #endif
 

@@ -4,7 +4,9 @@
 void __am_timer_init() {
 }
 
+//invoke callback and then callback read. TODO
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
+  map_write();
   uptime->us = 0;
 }
 

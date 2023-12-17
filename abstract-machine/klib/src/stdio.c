@@ -33,15 +33,13 @@ static int int_to_backstr(char* dst,int d) {
   }
   int cnt = 0; 
   bool negflag = (d < 0);
-  if(negflag) {
-    d = -d;
-    // putch('@');
-  }
-
+ 
   while (d) {
-    *dst = (char)(d%10+(int)'0');
-    // putch('#'); putch((char)(d%10+(int)'0')); putch(*dst); putch('#'); 
-    // assert(*dst<=(int)'9' && *dst>=(int)'0');
+    int dgt = d%10;
+    if(dgt<0) dgt = -dgt;
+    *dst = (char)(dgt+(int)'0');
+    // putch(' '); putch('>'); putch((char)(dgt+(int)'0')); putch('='); putch(*dst); putch('<');
+    // assert(*dst<=(int)'9' && *dst>=(int)'0');putch('\n'); 
     d/=10; cnt++;dst++;
   }
 
@@ -66,12 +64,15 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             break;
         case 'd':              /* int */
             d = va_arg(ap, int);
-            char int_str[10+2];
+            char int_str[10+5];
             int int_num = int_to_backstr(int_str,d);
             while (int_num-->0)
             {
               *out++ = int_str[int_num];
-              printf("DEBUG: vsprintf output:%c\n",int_str[int_num]);
+              // putch('#');putch('>');
+              // assert(int_str[int_num]>='0' && int_str[int_num]<='9');
+              // putch('|');
+              // printf("DEBUG: vsprintf output:%c\n",int_str[int_num]);
               cnt++;
             }
             break;
@@ -79,6 +80,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             /* need a cast here since va_arg only
               takes fully promoted types */
             c = (char) va_arg(ap, int);
+            // putch('$');putch('>');
+            // assert(c>='0' && c<='9');
+            // putch('|');
             memcpy(out,&c,1); out++;cnt++;
             break;
       }
@@ -132,7 +136,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
             break;
         case 'd':              /* int */
             d = va_arg(ap, int);
-            char int_str[10+2];
+            char int_str[10+5];
             int int_num = int_to_backstr(int_str,d);
             while (int_num-->0 && n > 1)
             {

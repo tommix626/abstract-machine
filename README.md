@@ -94,3 +94,8 @@ The following subprojects/components are included. Some of them are not fully im
 ## pa2.3 IO device
 - ### read source code, fix bug in printf when invoking nemu putch.
 - ### implement timer device. Understand AM abstraction level better.
+    - run benchmark at `/home/tom/ics2023/am-kernels/benchmarks`, get score ~200 / 100000 Marks (i9-9900K @ 3.60GHz)
+- ### dtrace. tracing of device access. (with Kconfig)
+- ### keyboard device. Record and detect make code and break code.
+    - abstract-machine/am/src/platform/nemu/ioe/input.c
+    - nemu/src/device/keyboard.c

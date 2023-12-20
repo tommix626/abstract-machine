@@ -7,7 +7,7 @@ void __am_timer_init() {
   outl(RTC_ADDR+4,0);
 }
 
-//this is invoked when ioe_read/ioe_write is called, which should: //invoke callback and then callback read. TODO
+//this is invoked when ioe_read/ioe_write is called, which should: //invoke callback by r/w into device regs.
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
   uptime->us = inl(RTC_ADDR+4); //this access also update time.
   uptime->us <<= 32;

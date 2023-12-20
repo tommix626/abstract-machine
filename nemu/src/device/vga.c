@@ -74,11 +74,20 @@ static inline void update_screen() {
 void vga_update_screen() {
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
+
+
+}
+
+//NOTE:custom func.
+static void vga_io_handler(uint32_t offset, int len, bool is_write) {
+  if (is_write && offset == 4) {
+    update_screen(); // NOTE: as long as is_write & offset==4, AM is initating a syncing request. managment of sync reg is currently in AM (gpu.c).
+  }
 }
 
 void init_vga() {
   vgactl_port_base = (uint32_t *)new_space(8);
-  vgactl_port_base[0] = (screen_width() << 16) | screen_height();
+  vgactl_port_base[0] = (screen_width() << 16) | screen_height(); //NOTE: how screen wh is stored in nemu. read this info to get it in AM. TODO
 #ifdef CONFIG_HAS_PORT_IO
   add_pio_map ("vgactl", CONFIG_VGA_CTL_PORT, vgactl_port_base, 8, NULL);
 #else
@@ -86,7 +95,7 @@ void init_vga() {
 #endif
 
   vmem = new_space(screen_size());
-  add_mmio_map("vmem", CONFIG_FB_ADDR, vmem, screen_size(), NULL);
+  add_mmio_map("vmem", CONFIG_FB_ADDR, vmem, screen_size(), vga_io_handler); // add custom handler. NOTE: CONFIG_FB_ADDR is the FB_ADDR in AM (nemu.h)
   IFDEF(CONFIG_VGA_SHOW_SCREEN, init_screen());
   IFDEF(CONFIG_VGA_SHOW_SCREEN, memset(vmem, 0, screen_size()));
 }

@@ -22,7 +22,7 @@ static uint32_t *rtc_port_base = NULL;
 //NOTE: callback function: param = (uint32_t,int,bool);
 static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
   assert(offset == 0 || offset == 4);
-  if (!is_write && offset == 4) { // NOTE: not write with offset 4 (why) means update time.
+  if (!is_write && offset == 4) { // NOTE: not write with offset 4 (why) means update time. Answer: expected behavior: read high bits and then low bits, then reading high bits call update time automatically
     uint64_t us = get_time();
     rtc_port_base[0] = (uint32_t)us;
     rtc_port_base[1] = us >> 32;

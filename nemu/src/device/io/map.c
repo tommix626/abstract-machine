@@ -60,6 +60,12 @@ void init_map() {
   p_space = io_space;
 }
 
+#ifdef CONFIG_DTRACE
+static void device_trace(IOMap *map, paddr_t addr, int len, bool is_write) {
+  DLog("device %s access(%s) at addr=%#x,len=%u",map->name,is_write? "write":"read",addr, len);
+}
+#endif
+
 /// @brief  read len byte in map.
 /// @param addr read starting addr (addr is paddr/guest's phy addr) [function will translate phy addr to host addr.]
 /// @param len read length. sould be integer between 1 and 8;
@@ -68,6 +74,8 @@ void init_map() {
 word_t map_read(paddr_t addr, int len, IOMap *map) {
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
+  //dtrace
+  IFDEF(CONFIG_DTRACE,device_trace(map,addr,len,false));
   paddr_t offset = addr - map->low;
   invoke_callback(map->callback, offset, len, false); // ask ioe prepare data to read
   word_t ret = host_read(map->space + offset, len);
@@ -82,6 +90,8 @@ word_t map_read(paddr_t addr, int len, IOMap *map) {
 void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
+  //dtrace
+  IFDEF(CONFIG_DTRACE,device_trace(map,addr,len,true));
   paddr_t offset = addr - map->low;
   host_write(map->space + offset, len, data);
   invoke_callback(map->callback, offset, len, true);

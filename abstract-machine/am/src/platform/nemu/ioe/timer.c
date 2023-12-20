@@ -3,8 +3,8 @@
 // NOTE: functions here are called in abstract-machine/am/src/platform/nemu/ioe/ioe.c
 
 void __am_timer_init() {
-  // outl(RTC_ADDR,0);
-  // outl(RTC_ADDR+4,0);
+  outl(RTC_ADDR,0);
+  outl(RTC_ADDR+4,0);
 }
 
 //this is invoked when ioe_read/ioe_write is called, which should: //invoke callback and then callback read. TODO

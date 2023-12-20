@@ -166,6 +166,11 @@ config FTRACE
   bool "FTRACE: Enable function call return tracer"
   default y
 
+config DTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "DTRACE: Enable device access tracer"
+  default y
+
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"

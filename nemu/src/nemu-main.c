@@ -19,7 +19,9 @@
 void init_monitor(int, char *[]);
 void am_init_monitor();
 void engine_start();
+#ifndef CONFIG_TARGET_AM
 static void test_expr();
+#endif
 int is_exit_status_bad();
 
 int main(int argc, char *argv[]) {
@@ -30,15 +32,18 @@ int main(int argc, char *argv[]) {
 #else
   init_monitor(argc, argv);
 #endif
+  
   /*Unit test*/
-  test_expr();
+  IFNDEF(CONFIG_TARGET_AM,test_expr());
+  
+  
   /* Start engine. */
   engine_start();
 
   return is_exit_status_bad();
 }
 
-
+#ifndef CONFIG_TARGET_AM
 /// @brief test th expr evaluation function
 void test_expr()
 {
@@ -79,3 +84,4 @@ void test_expr()
   printf("expr10000 test pass\n");
   // assert(0);
 }
+#endif

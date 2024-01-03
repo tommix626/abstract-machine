@@ -12,11 +12,12 @@
 #endif
 
 void __am_gpu_init() { 
-  int i;
-  int w = SCREEN_W;
-  int h = SCREEN_H; 
-  uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
-  for (i = 0; i < w * h; i ++) fb[i] = i; //initialize the screen.
+  //just a init test. can leave blank
+  // int i;
+  // int w = SCREEN_W;
+  // int h = SCREEN_H; 
+  // uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
+  // for (i = 0; i < w * h; i ++) fb[i] = i; //initialize the screen.
   //debug: draw a red rect
   // for (int i = 30; i < 50; i ++) {
   //   for (int j = 100; j < 200; j ++) {
@@ -25,8 +26,8 @@ void __am_gpu_init() {
   //   }
   // }
 
-  outl(SYNC_ADDR, 1); //update screen.
-  putch('@'); //DEBUG
+  // outl(SYNC_ADDR, 1); //update screen. by triggering the io_handler callback in vga.c, which then write the memory with the newest pixel.
+  // putch('@'); //DEBUG
 }
 
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
@@ -51,7 +52,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     }
   }
   if (ctl->sync) {
-    outl(SYNC_ADDR, 1); //this call make vga sync/updates
+    outl(SYNC_ADDR, 1); //write sync register to 1, this call make vga sync/updates
   }
 }
 

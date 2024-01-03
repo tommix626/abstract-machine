@@ -17,7 +17,9 @@
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <locale.h>
+
 #include <monitor/watchpoint.h> //for watchpoint
+
 #include <monitor/iringbuf.h> //for iringbuf
 
 /* The assembly code of instructions executed is only output to the screen
@@ -48,6 +50,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 
   //watchpoint
 #ifdef CONFIG_WATCHPOINT
+#ifndef CONFIG_TARGET_AM
   bool stop_flag = true;
   check_watchpoint(&stop_flag);
   // IFDEF(CONFIG_WATCHPOINT,check_watchpoint(&stop_flag));//alternative
@@ -55,8 +58,9 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
     nemu_state.state = NEMU_STOP;
     Log("program stop due to active watchpoint reached!");
   }
-  #else
-  // WLog("Watchpoint is disabled! enable it in Kconfig");
+#endif
+#else
+// WLog("Watchpoint is disabled! enable it in Kconfig");
 #endif
 }
 

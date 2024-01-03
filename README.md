@@ -99,3 +99,10 @@ The following subprojects/components are included. Some of them are not fully im
 - ### keyboard device. Record and detect make code and break code.
     - abstract-machine/am/src/platform/nemu/ioe/input.c
     - nemu/src/device/keyboard.c
+- ### VGA: implement VGA display IOE
+    - NEMU part, include registering this device and register read write behaviors and maps: `nemu/src/device/vga.c`
+    - AM part, include drawing rect and syncing through io_read/io_write: `abstract-machine/am/src/platform/nemu/ioe/gpu.c`
+- Run NEMU on NEMU
+    - Fix Bug
+    - Turing Complete, use the following command to run NEMU(no image) on NEMU, or run SNAKE on NEMU on NEMU... (Very Slow!)
+    - make ARCH=riscv32-nemu mainargs=/home/<_username_>/ics2023/am-kernels/kernels/snake/build/snake-riscv32-nemu.bin

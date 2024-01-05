@@ -4,6 +4,7 @@
 
 static Context* (*user_handler)(Event, Context*) = NULL;
 
+//fillout the Context PTR c
 Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
@@ -18,11 +19,11 @@ Context* __am_irq_handle(Context *c) {
   return c;
 }
 
-extern void __am_asm_trap(void);
+extern void __am_asm_trap(void); //NOTE: mtvec addr will be passed to csrw instruction in cte_init below
 
 bool cte_init(Context*(*handler)(Event, Context*)) {
   // initialize exception entry
-  asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
+  asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap)); // NOTE: %0 placeholder for __am_asm_trap, which should store the addr of error handle entry addr.
 
   // register event handler
   user_handler = handler;

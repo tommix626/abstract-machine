@@ -17,15 +17,13 @@
 
 
 //FIXME: should not contain AM code.
-extern void __am_asm_trap(void); //NOTE:get the mtvec addr
-extern Context* __am_irq_handle(Context *c);
+
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''. (HOW??? ->callbacks?)
    * Then return the address of the interrupt/exception vector.
    */
-  __am_irq_handle() //fillout the context
-  return &__am_asm_trap; //cpu.pc will be set outside.
+  return 0;
 }
 
 word_t isa_query_intr() {

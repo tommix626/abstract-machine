@@ -23,7 +23,10 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''. (HOW??? ->callbacks?)
    * Then return the address of the interrupt/exception vector.
    */
-  return 0;
+  cpu.CSR[CSR_MEPC] = epc; //FIXME: what is epc, should we use epc instead of cpu.pc (because cpu.pc is updated after the instruction?)
+  cpu.CSR[CSR_MCAUSE] = NO;
+  DLog("raise_intr return mtvec addr=%#x",cpu.CSR[CSR_MTVEC]);
+  return cpu.CSR[CSR_MTVEC];
 }
 
 word_t isa_query_intr() {

@@ -17,13 +17,15 @@
 #include <cpu/cpu.h>
 #include <cpu/ifetch.h>
 #include <cpu/decode.h>
+#include <isa.h> // for zisrc extension
 
 #define R(i) gpr(i)
+#define SR(i) (cpu.CSR[i])
 #define Mr vaddr_read
 #define Mw vaddr_write
 
 enum {
-  TYPE_I, TYPE_U, TYPE_S, TYPE_J, TYPE_R, TYPE_B,
+  TYPE_I, TYPE_U, TYPE_S, TYPE_J, TYPE_R, TYPE_B, TYPE_Z, TYPE_ZI,
   TYPE_N, // none
 };
 
@@ -34,7 +36,7 @@ enum {
 #define immS() do { *imm = (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); } while(0)
 #define immJ() do { *imm = SEXT(BITS(i, 19, 12) | BITS(i, 31, 31) << 8, 9) << 12 | BITS(i, 20, 20) << 11 | BITS(i, 30, 21) <<1 ; } while(0) 
 #define immB() do { *imm = SEXT(BITS(i, 31, 31),1) << 12 | (BITS(i, 7, 7) << 11) | (BITS(i, 30, 25) << 5) | (BITS(i, 11, 8) << 1); } while(0)
-
+#define immZI() do { *imm = BITS(i, 19, 15); } while(0)
 
 static inline sword_t msbExtendedShift(sword_t src1, sword_t src2) {
     if (src2 <= 0 || src2 >= 32) {
@@ -98,6 +100,7 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
   int rs1 = BITS(i, 19, 15);
   int rs2 = BITS(i, 24, 20);
   *rd     = BITS(i, 11, 7);
+  *imm = 0;
   // DLog("Decode operand result: rd rs1 rs2 = %#x %#x %#x",*rd,rs1,rs2);
   switch (type) {
     case TYPE_I: src1R();          immI(); break;
@@ -106,6 +109,8 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
     case TYPE_J:                   immJ(); break;
     case TYPE_R: src1R(); src2R();         break;
     case TYPE_B: src1R(); src2R(); immB(); break;
+    case TYPE_Z: src1R(); *src2 = BITS(i, 31, 20); immZI(); break; // NOTE: store csr index in src2. immZI() to detect x0 in rs1
+    case TYPE_ZI: *src2 = BITS(i, 31, 20); immZI();break;// NOTE: store csr index in src2.
   }
 }
 
@@ -180,6 +185,17 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000001 ????? ????? 101 ????? 01100 11", "divu"  , R, {if(src2==0) WLog("div by 0"); R(rd) = src1 / src2;});
   INSTPAT("0000001 ????? ????? 110 ????? 01100 11", "rem"   , R, R(rd) = (sword_t)src1 % (sword_t)src2); //sign issue! same with dividend
   INSTPAT("0000001 ????? ????? 111 ????? 01100 11", "remu"  , R, R(rd) = src1 % src2);
+
+  /*ZISCR extension*/
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", "ecall" , N, DLog("ecall!\n");s->dnpc = isa_raise_intr(11,s->pc)); //NOTE: assume all ecall are on Machine level, which is code 11.
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", "mret" , N, s->dnpc=SR(CSR_MEPC)); //NOTE: restore CONTEXT? NO NEED. done by AM (OS), not here.
+
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", "csrrw" , Z, if(rd!=0){R(rd) = SR(src2);} SR(src2) = src1 );
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", "csrrs" , Z, R(rd) = SR(src2); if(imm!=0) {SR(src2) |= src1;});
+  INSTPAT("??????? ????? ????? 011 ????? 11100 11", "csrrc" , Z, R(rd) = SR(src2); if(imm!=0) {SR(src2) &= ~src1;});
+  INSTPAT("??????? ????? ????? 101 ????? 11100 11", "csrrwi" , ZI, if(rd!=0){R(rd) = SR(src2);} SR(src2) = imm);
+  INSTPAT("??????? ????? ????? 110 ????? 11100 11", "csrrsi" , ZI, R(rd) = SR(src2); if(imm!=0) {SR(src2) |= imm;});
+  INSTPAT("??????? ????? ????? 111 ????? 11100 11", "csrrci" , ZI, R(rd) = SR(src2); if(imm!=0) {SR(src2) &= ~imm;});
 
   INSTPAT("0000000 00001 00000 000 00000 11100 11", "ebreak" , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", "inv"    , N, INV(s->pc)); //catch invalid instruction

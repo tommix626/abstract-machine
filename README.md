@@ -106,3 +106,12 @@ The following subprojects/components are included. Some of them are not fully im
     - Fix Bug
     - Turing Complete, use the following command to run NEMU(no image) on NEMU, or run SNAKE on NEMU on NEMU... (Very Slow!)
     - make ARCH=riscv32-nemu mainargs=/home/<_username_>/ics2023/am-kernels/kernels/snake/build/snake-riscv32-nemu.bin
+
+# PA3 Operating System
+## pa3.1 Error Handling and OS context change.
+- ### implement privileged instruction set `RV32-Zicsr` extension along CSR hardware.
+    - Implement the CSR registers in NEMU and `raise_intr` function for `ecall`.
+    - implement atomic read/write csr instructions: `csrrw`,`csrrs`,`csrrc`,`csrrwi`,`csrrsi`,`csrrci`,`ecall`,`mret`.
+    - nemu/src/isa/riscv32/inst.c
+    - pass yield test: `~/ics2023/am-kernels/tests/am-tests$ make ARCH=riscv32-nemu mainargs=i run`
+

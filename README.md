@@ -102,7 +102,7 @@ The following subprojects/components are included. Some of them are not fully im
 - ### VGA: implement VGA display IOE
     - NEMU part, include registering this device and register read write behaviors and maps: `nemu/src/device/vga.c`
     - AM part, include drawing rect and syncing through io_read/io_write: `abstract-machine/am/src/platform/nemu/ioe/gpu.c`
-- Run NEMU on NEMU
+- ### Run NEMU on NEMU
     - Fix Bug
     - Turing Complete, use the following command to run NEMU(no image) on NEMU, or run SNAKE on NEMU on NEMU... (Very Slow!)
     - make ARCH=riscv32-nemu mainargs=/home/<_username_>/ics2023/am-kernels/kernels/snake/build/snake-riscv32-nemu.bin
@@ -125,4 +125,7 @@ The following subprojects/components are included. Some of them are not fully im
         - our NEMU hardware translate this instruction to storing CSR and jump PC to `mtvec` (`nemu/src/isa/riscv32/system/intr.c:isa_raise_intr`)
         - the code at mtvec is AM(OS) defined (`abstract-machine/am/src/riscv/nemu/trap.S:__am_asm_trap`), which store context, and handle events by calling `abstract-machine/am/src/riscv/nemu/cte.c:__am_irq_handle`, and restore context, then `mret`.
         - `mret` , translated by NEMU: restore pc to CSR mepc, and continue program going on "user level". (returning control from OS)
-    
+
+- ### etrace: Exception Tracing
+    - nemu/Kconfig
+    - nemu/src/isa/riscv32/system/intr.c

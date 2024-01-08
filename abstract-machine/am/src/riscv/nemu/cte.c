@@ -6,9 +6,11 @@ static Context* (*user_handler)(Event, Context*) = NULL;
 
 //fillout the Context PTR c
 Context* __am_irq_handle(Context *c) {
+  // printf("mcause=%d,mstatus=%d ,mepc=%d \n", c->mcause, c->mstatus, c->mepc); //DEBUG NOTE: cannot use %#x, since my klib doesn't support it.
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
+      case 11: ev.event = EVENT_YIELD; break;
       default: ev.event = EVENT_ERROR; break;
     }
 

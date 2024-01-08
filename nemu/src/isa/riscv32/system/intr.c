@@ -16,17 +16,16 @@
 #include <isa.h> //CPU externed in here
 
 
-//FIXME: should not contain AM code.
-
 
 //called when nemu running ecall intstruction
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  /* TODO: Trigger an interrupt/exception with ``NO''. (HOW??? ->callbacks?)
+  /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
+  IFDEF(CONFIG_ETRACE,DLog("etrace: raising interruption and set mcause=%d mepc=%#x",NO,epc));
   cpu.CSR[CSR_MEPC] = epc; //FIXME: what is epc, should we use epc instead of cpu.pc (because cpu.pc is updated after the instruction?)
   cpu.CSR[CSR_MCAUSE] = NO;
-  DLog("raise_intr return mtvec addr=%#x",cpu.CSR[CSR_MTVEC]);
+  IFDEF(CONFIG_ETRACE,DLog("raise_intr return mtvec addr=%#x",cpu.CSR[CSR_MTVEC]));
   return cpu.CSR[CSR_MTVEC];
 }
 

@@ -109,9 +109,20 @@ The following subprojects/components are included. Some of them are not fully im
 
 # PA3 Operating System
 ## pa3.1 Error Handling and OS context change.
-- ### implement privileged instruction set `RV32-Zicsr` extension along CSR hardware.
+- ### Hardware level: implement privileged instruction set `RV32-Zicsr` extension along CSR hardware.
     - Implement the CSR registers in NEMU and `raise_intr` function for `ecall`.
     - implement atomic read/write csr instructions: `csrrw`,`csrrs`,`csrrc`,`csrrwi`,`csrrsi`,`csrrci`,`ecall`,`mret`.
     - nemu/src/isa/riscv32/inst.c
     - pass yield test: `~/ics2023/am-kernels/tests/am-tests$ make ARCH=riscv32-nemu mainargs=i run`
 
+- ### Software level: AM save/restore Context, Event handling
+    - save/restore context in `abstract-machine/am/src/riscv/nemu/trap.S`
+        - note this is the OS define routine. Also: it should be adding 34 to the mepc CSR to avoid caughtup infinitely at `ecall`.
+    - handling event in `abstract-machine/am/src/riscv/nemu/cte.c:__am_irq_handle`, called by `trap.S`.
+    - the journey:
+        - start with client software program calling yield,
+        - in assembly code, its doing ecall.
+        - our NEMU hardware translate this instruction to storing CSR and jump PC to `mtvec` (`nemu/src/isa/riscv32/system/intr.c:isa_raise_intr`)
+        - the code at mtvec is AM(OS) defined (`abstract-machine/am/src/riscv/nemu/trap.S:__am_asm_trap`), which store context, and handle events by calling `abstract-machine/am/src/riscv/nemu/cte.c:__am_irq_handle`, and restore context, then `mret`.
+        - `mret` , translated by NEMU: restore pc to CSR mepc, and continue program going on "user level". (returning control from OS)
+    

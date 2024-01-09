@@ -129,3 +129,13 @@ The following subprojects/components are included. Some of them are not fully im
 - ### etrace: Exception Tracing
     - nemu/Kconfig
     - nemu/src/isa/riscv32/system/intr.c
+
+## pa3.2 User Program and Syscall.
+- ### setting up nanos-lite, simple OS.
+    - fix instruction bug on yield. change mcause to store a7 register.
+    - handled YIELD event.
+- ### program loader.
+    - load program that is Cmake into ramdisk.img
+    - read ELF file, extract segments, and memset/copy to virtual locations: 0x83000000.
+    - nanos-lite/src/loader.c
+    

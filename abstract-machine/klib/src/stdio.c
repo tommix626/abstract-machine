@@ -49,6 +49,80 @@ static int int_to_backstr(char* dst,int d) {
   return cnt;
 }
 
+static int unsigned_int_to_backstr(char* dst, unsigned int d) {
+    if (d == 0) {
+        *dst = '0';
+        return 1;
+    }
+
+    int cnt = 0;
+    while (d) {
+        int dgt = d % 10;
+        *dst = (char)(dgt + (int)'0');
+        d /= 10;
+        cnt++;
+        dst++;
+    }
+
+    return cnt;
+}
+
+static int uint_to_hexstr(char* dst, unsigned int d) {
+    static const char hexdigits[] = "0123456789abcdef";
+    int cnt = 0;
+
+    if (d == 0) {
+        *dst++ = '0';
+        cnt++;
+    } else {
+        // Process each digit in reverse order
+        while (d) {
+            unsigned int digit = d % 16;
+            *dst++ = hexdigits[digit];
+            d /= 16;
+            cnt++;
+        }
+    }
+
+    // The string is in reverse order, so it will be reversed again when copied
+    return cnt;
+}
+
+static int ptr_to_hexstr(char* dst, void* ptr) {
+    static const char hexdigits[] = "0123456789abcdef";
+    unsigned long addr = (unsigned long)ptr;
+    int cnt = 0;
+
+    do {
+        unsigned int digit = addr % 16;
+        *dst++ = hexdigits[digit];
+        addr /= 16;
+        cnt++;
+    } while (addr > 0);
+
+    return cnt;
+}
+
+static int uint16_to_str(char* dst, uint16_t d) {
+    if (d == 0) {
+        *dst = '0';
+        return 1;
+    }
+
+    int cnt = 0;
+    while (d) {
+        int dgt = d % 10;
+        *dst = (char)(dgt + '0');
+        d /= 10;
+        cnt++;
+        dst++;
+    }
+
+    return cnt;
+}
+
+
+
 int vsprintf(char *out, const char *fmt, va_list ap) {
   int d,cnt=0;
   char c;
@@ -64,7 +138,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             break;
         case 'd':              /* int */
             d = va_arg(ap, int);
-            char int_str[10+5];
+            char int_str[20+5];
             int int_num = int_to_backstr(int_str,d);
             while (int_num-->0)
             {
@@ -85,6 +159,58 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             // putch('|');
             memcpy(out,&c,1); out++;cnt++;
             break;
+        
+        case 'u':              /* unsigned int */
+            unsigned int u = va_arg(ap, unsigned int);
+            char u_str[20+5];
+            int u_num = unsigned_int_to_backstr(u_str, u); 
+            while (u_num-->0) {
+                *out++ = u_str[u_num];
+                cnt++;
+            }
+            break;
+        case '#':
+            if (*++fmt == 'x') {
+                unsigned int x = va_arg(ap, unsigned int);
+                char hex_str[10]; // Enough to hold any 32-bit unsigned int in hex
+                int hex_len = uint_to_hexstr(hex_str, x);
+
+                // Prepend "0x"
+                *out++ = '0'; *out++ = 'x';
+                cnt += 2;
+
+                // REVERSE output
+                while (hex_len-- > 0) {
+                    *out++ = hex_str[hex_len];
+                    cnt++;
+                }
+            }
+            break;
+        case 'p': 
+            void* p = va_arg(ap, void*);
+            char ptr_str[20]; // Enough for a pointer's hexadecimal representation
+            int ptr_len = ptr_to_hexstr(ptr_str, p);
+
+            while (ptr_len-- > 0) {
+                *out++ = ptr_str[ptr_len];
+                cnt++;
+            }
+            break;
+        case 'h':
+            if (*++fmt == 'u') { /* uint16_t */
+                uint16_t hu = (uint16_t)va_arg(ap, unsigned int); // Promoted to unsigned int
+                char hu_str[6]; // Enough for any 16-bit value
+                int hu_len = uint16_to_str(hu_str, hu);
+
+                // Copy the uint16_t string in reverse order (since it was converted backward)
+                while (hu_len-- > 0) {
+                    *out++ = hu_str[hu_len];
+                    cnt++;
+                }
+            }
+            break;
+
+
       }
       fmt++;
     }

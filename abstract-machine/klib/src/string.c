@@ -63,6 +63,11 @@ int strncmp(const char *s1, const char *s2, size_t n) {
   return cmp;
 }
 
+/// @brief set a part of mem (s,s+n) with c.
+/// @param s mem start
+/// @param c the content
+/// @param n size
+/// @return 
 void *memset(void *s, int c, size_t n) {
   void* sptr = s;
   while(n-->0){

@@ -4,6 +4,11 @@ extern uint8_t ramdisk_start;
 extern uint8_t ramdisk_end;
 #define RAMDISK_SIZE ((&ramdisk_end) - (&ramdisk_start))
 
+//NOTE: relationship between ramdisk and mem.
+// ramdisk is just a part of the nanos-lite program. See resource.S, use ramdisk_start to get starting location.
+// ramdisk is a ELF file, so reading it, we can understand its structure, and for each segment within it, we should load it to the mem of the hardware (NEMU).
+// wait, isn't nanos already in mem? YES! its the running img for NEMU, which starts at 0x80000000, and to avoid collision, the loader of nanos load the dummy/user thread to 0x83000000.
+
 /* The kernel is monolithic, therefore we do not need to
  * translate the address `buf' from the user process to
  * a physical one, which is necessary for a microkernel.
@@ -24,7 +29,7 @@ size_t ramdisk_write(const void *buf, size_t offset, size_t len) {
 }
 
 void init_ramdisk() {
-  Log("ramdisk info: start = %p, end = %p, size = %d bytes",
+  Log("ramdisk info: start = %p, end = %p, size = %d bytes ",
       &ramdisk_start, &ramdisk_end, RAMDISK_SIZE);
 }
 

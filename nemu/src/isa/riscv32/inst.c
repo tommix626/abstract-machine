@@ -187,7 +187,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000001 ????? ????? 111 ????? 01100 11", "remu"  , R, R(rd) = src1 % src2);
 
   /*ZISCR extension*/
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", "ecall" , N, IFDEF(CONFIG_ETRACE,DLog("ecall!\n"));s->dnpc = isa_raise_intr(11,s->pc)); //NOTE: assume all ecall are on Machine level, which is code 11.
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", "ecall" , N, IFDEF(CONFIG_ETRACE,DLog("ecall!\n"));s->dnpc = isa_raise_intr(isa_reg_str2val("a7",NULL),s->pc)); //NOTE: assume all ecall are on Machine level, which is code 11.
   INSTPAT("0011000 00010 00000 000 00000 11100 11", "mret" , N, s->dnpc=SR(CSR_MEPC)); //NOTE: restore CONTEXT? NO NEED. done by AM (OS), not here.
 
   INSTPAT("??????? ????? ????? 001 ????? 11100 11", "csrrw" , Z, if(rd!=0){R(rd) = SR(src2);} SR(src2) = src1 );

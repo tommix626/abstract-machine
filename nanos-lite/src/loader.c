@@ -48,9 +48,9 @@ static uint32_t load_elf(Elf_Ehdr elf_start, uint32_t elf_start_addr) {
         // printf("  FileSize: %u\n", phdr.p_filesz);
         // printf("  MemSize: %u\n", phdr.p_memsz);
         if(phdr->p_type == 1){ //1 stands for loading.
-        printf("copying () to %p",(void *)phdr->p_vaddr);
+          Log("copying (%#x,%#x) to %p",phdr->p_offset,phdr->p_offset+phdr->p_filesz,(void *)phdr->p_vaddr);
           ramdisk_read((void *)phdr->p_vaddr,phdr->p_offset,phdr->p_filesz);
-          // printf("memset amount:%u-%u\n",phdr->p_memsz,phdr->p_filesz);
+          Log("cleaning margin amount:%u-%u\n",phdr->p_memsz,phdr->p_filesz);
           memset((void *)phdr->p_vaddr+phdr->p_filesz,0,phdr->p_memsz-phdr->p_filesz);
         }
         phdr++;

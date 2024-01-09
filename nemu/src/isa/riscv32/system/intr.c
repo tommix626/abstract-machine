@@ -24,9 +24,9 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
    */
   IFDEF(CONFIG_ETRACE,DLog("etrace: raising interruption and set mcause=%d mepc=%#x",NO,epc));
   cpu.CSR[CSR_MCAUSE] = NO;
-  // if(NO==11) { //if yield.
-  //   epc+=4;
-  // }
+  if(NO==-1) { //if yield. FIXME BOOKMARK
+    epc+=4;
+  }
   cpu.CSR[CSR_MEPC] = epc; //FIXME: what is epc, should we use epc instead of cpu.pc (because cpu.pc is updated after the instruction?)
   IFDEF(CONFIG_ETRACE,DLog("raise_intr return mtvec addr=%#x",cpu.CSR[CSR_MTVEC]));
   return cpu.CSR[CSR_MTVEC];

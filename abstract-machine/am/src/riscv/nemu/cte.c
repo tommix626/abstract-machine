@@ -4,13 +4,16 @@
 
 static Context* (*user_handler)(Event, Context*) = NULL;
 
-//fillout the Context PTR c
+//fillout the Context PTR c (the only handler?)
 Context* __am_irq_handle(Context *c) {
   // printf("mcause=%d,mstatus=%d ,mepc=%d \n", c->mcause, c->mstatus, c->mepc); //DEBUG NOTE: cannot use %#x, since my klib doesn't support it.
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
       case -1: ev.event = EVENT_YIELD; break;
+      case 0: //fall through , SYS_exit call 
+      case 1: ev.event = EVENT_SYSCALL; break; // 1 is the SYS_yield, called by dummy
+      
       default: ev.event = EVENT_ERROR; break;
     }
 
@@ -38,10 +41,15 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
 }
 
 void yield() {
+  
+// printf("TETETET\n");
 #ifdef __riscv_e
   asm volatile("li a5, -1; ecall");
+  
 #else
+
   asm volatile("li a7, -1; ecall");
+  
 #endif
 }
 

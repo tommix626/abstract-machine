@@ -138,4 +138,6 @@ The following subprojects/components are included. Some of them are not fully im
     - load program that is Cmake into ramdisk.img
     - read ELF file, extract segments, and memset/copy to virtual locations: 0x83000000.
     - nanos-lite/src/loader.c
-    
+
+
+nanos user call syscall by calling ecall with param, the irq classify it as syscall event and hand to do_syscall, do_syscall (OS) delegate to am-yield, am yield do ecall/mtvec/... use do_event handler and return a value. do_syscall store the return val and hand it back to user

@@ -164,7 +164,7 @@ config MTRACE_COND
 config FTRACE
   depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
   bool "FTRACE: Enable function call return tracer"
-  default y
+  default n
 
 config DTRACE
   depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
@@ -176,6 +176,10 @@ config ETRACE
   bool "ETRACE: Enable exception tracer"
   default y
 
+config STRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "STRACE: Enable syscall tracer,(nanos-lite)WARNING:NOT EFFECTIVE, change at: nanos-lite/src/syscall.c manually"
+  default y
 
 config DIFFTEST
   depends on TARGET_NATIVE_ELF

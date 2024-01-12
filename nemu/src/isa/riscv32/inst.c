@@ -24,6 +24,11 @@
 #define Mr vaddr_read
 #define Mw vaddr_write
 
+#ifdef __riscv_e
+#define ECALL_REG isa_reg_str2val("a5",NULL)
+#else
+#define ECALL_REG isa_reg_str2val("a7",NULL)
+#endif
 enum {
   TYPE_I, TYPE_U, TYPE_S, TYPE_J, TYPE_R, TYPE_B, TYPE_Z, TYPE_ZI,
   TYPE_N, // none
@@ -114,6 +119,9 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
   }
 }
 
+
+
+
 /// @brief decoding!
 static int decode_exec(Decode *s) {
   int rd = 0;
@@ -187,7 +195,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000001 ????? ????? 111 ????? 01100 11", "remu"  , R, R(rd) = src1 % src2);
 
   /*ZISCR extension*/
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", "ecall" , N, IFDEF(CONFIG_ETRACE,DLog("ecall!\n"));s->dnpc = isa_raise_intr(isa_reg_str2val("a7",NULL),s->pc)); //NOTE: assume all ecall are on Machine level, which is code 11.
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", "ecall" , N, IFDEF(CONFIG_ETRACE,DLog("ecall!\n"));s->dnpc = isa_raise_intr(ECALL_REG,s->pc)); //NOTE: assume all ecall are on Machine level, which is code 11.
   INSTPAT("0011000 00010 00000 000 00000 11100 11", "mret" , N, s->dnpc=SR(CSR_MEPC)); //NOTE: restore CONTEXT? NO NEED. done by AM (OS), not here.
 
   INSTPAT("??????? ????? ????? 001 ????? 11100 11", "csrrw" , Z, if(rd!=0){R(rd) = SR(src2);} SR(src2) = src1 );

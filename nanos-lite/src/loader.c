@@ -10,6 +10,27 @@
 # define Elf_Phdr Elf32_Phdr
 #endif
 
+//TODO add macro detection, see /usr/include/elf.h
+// #if defined(__ISA_X86__)
+// # define ARGS_ARRAY ("int $0x80", "eax", "ebx", "ecx", "edx", "eax")
+// #elif defined(__ISA_MIPS32__)
+// # define ARGS_ARRAY ("syscall", "v0", "a0", "a1", "a2", "v0")
+// #elif defined(__riscv)
+// #ifdef __riscv_e
+// # define ARGS_ARRAY ("ecall", "a5", "a0", "a1", "a2", "a0")
+// #else
+// # define ARGS_ARRAY ("ecall", "a7", "a0", "a1", "a2", "a0")
+// #endif
+// #elif defined(__ISA_AM_NATIVE__)
+// # define ARGS_ARRAY ("call *0x100000", "rdi", "rsi", "rdx", "rcx", "rax")
+// #elif defined(__ISA_X86_64__)
+// # define ARGS_ARRAY ("int $0x80", "rdi", "rsi", "rdx", "rcx", "rax")
+// #elif defined(__ISA_LOONGARCH32R__)
+// # define ARGS_ARRAY ("syscall 0", "a7", "a0", "a1", "a2", "a0")
+// #else
+// #error _syscall_ is not implemented
+// #endif
+
 size_t ramdisk_read(void *buf, size_t offset, size_t len);
 
 // This function assumes 'elf_start' is a pointer to the beginning of the ELF file in memory

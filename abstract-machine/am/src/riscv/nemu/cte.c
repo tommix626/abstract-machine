@@ -11,8 +11,7 @@ Context* __am_irq_handle(Context *c) {
     Event ev = {0};
     switch (c->mcause) {
       case -1: ev.event = EVENT_YIELD; break;
-      case 0: //fall through , SYS_exit call 
-      case 1: ev.event = EVENT_SYSCALL; break; // 1 is the SYS_yield, called by dummy
+      case 0 ... 19: ev.event = EVENT_SYSCALL; break; // 0:SYS_exit; 1: SYS_yield... called by user-level program. defined: navy-apps/libs/libos/src/syscall.h
       
       default: ev.event = EVENT_ERROR; break;
     }

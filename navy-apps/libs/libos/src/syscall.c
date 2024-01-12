@@ -69,7 +69,8 @@ int _open(const char *path, int flags, mode_t mode) {
 }
 
 int _write(int fd, void *buf, size_t count) {
-  _exit(SYS_write);
+  // _exit(SYS_write); //TODO: change to syscall accoridng with arg sequence
+  _syscall_(SYS_write, fd, buf, count);
   return 0;
 }
 

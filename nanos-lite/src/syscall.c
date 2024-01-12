@@ -12,8 +12,9 @@ void do_syscall(Context *c) {
   a[0] = c->GPR1;
 
   switch (a[0]) {
-    case 1: c->GPRx = sys_yield();break; //yield
     case 0: halt(0);break;//exit
+    case 1: c->GPRx = sys_yield();break; //yield
+    case 4: c->GPRx = sys_write();break; //write
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
 
@@ -23,7 +24,20 @@ void do_syscall(Context *c) {
 }
 
 uintptr_t sys_yield(){
+  #ifdef CONFIG_STRACE 
   Log("do_syscall dispatch yield!");
+  #endif
   yield();
+  return 0;
+}
+
+uintptr_t sys_write(){
+  #ifdef CONFIG_STRACE 
+  Log("do_syscall call helper method sys_write!");
+  #endif
+  /** peusdocode
+   * 1. check fd (which arg) is 1/2 -> putch(stdout, stderr[?]) [man 2 write/man syscalls/man syscall]
+   * 2. what does it return (man 2 write) On success, the number of bytes written is returned.  On error, -1 is returned,
+  */
   return 0;
 }

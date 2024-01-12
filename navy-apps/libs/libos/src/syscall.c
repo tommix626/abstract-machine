@@ -73,8 +73,21 @@ int _write(int fd, void *buf, size_t count) {
   return _syscall_(SYS_write, fd, (intptr_t)buf, count);
 }
 
-void *_sbrk(intptr_t increment) {
-  return (void *)-1;
+
+extern char end;
+uintptr_t navy_brk = NULL;
+void *_sbrk(intptr_t increment) { //do not invoke Log/printf here, or else cause dead recursion: _sbrk -> printf -> malloc -> _sbrk ...
+  Log("BRRK CALLLLLLLED");
+  // return (void *)-1;
+  if(navy_brk == NULL){
+    navy_brk = &end;
+  }
+  if(0 == _syscall_(SYS_brk, navy_brk+increment, 0, 0)) { // if allocate allowed by system
+    uintptr_t old_brk = navy_brk;
+    navy_brk += increment; //update navy_brk
+    return old_brk;
+  }
+  else return (void *)-1;
 }
 
 int _read(int fd, void *buf, size_t count) {

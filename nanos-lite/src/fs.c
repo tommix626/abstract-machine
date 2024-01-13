@@ -9,6 +9,7 @@ typedef struct {
   size_t disk_offset;
   ReadFn read;
   WriteFn write;
+  size_t open_offset;
 } Finfo;
 
 enum {FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB};
@@ -33,4 +34,19 @@ static Finfo file_table[] __attribute__((used)) = {
 
 void init_fs() {
   // TODO: initialize the size of /dev/fb
+}
+
+int fs_open(const char *pathname, int flags, int mode){
+  return open(pathname,flags,mode);
+}
+size_t fs_read(int fd, void *buf, size_t len){
+  return read(fd,buf,len);
+}
+size_t fs_write(int fd, const void *buf, size_t len){
+  return write(fd,buf,len);
+}
+
+
+int fs_close(int fd){
+  return 0; //note the open_offset is reset when opening file.
 }

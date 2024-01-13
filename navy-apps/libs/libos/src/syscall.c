@@ -64,8 +64,8 @@ void _exit(int status) {
 }
 
 int _open(const char *path, int flags, mode_t mode) {
-  _exit(SYS_open);
-  return 0;
+  // _exit(SYS_open);
+  return _syscall_(SYS_open, (intptr_t)path, flags, mode);
 }
 
 int _write(int fd, void *buf, size_t count) {
@@ -74,30 +74,30 @@ int _write(int fd, void *buf, size_t count) {
 }
 
 
-extern char end;
-uintptr_t navy_brk = NULL;
+extern char _end;
+static uintptr_t navy_brk = (__intptr_t) &_end;
 void *_sbrk(intptr_t increment) { //do not invoke Log/printf here, or else cause dead recursion: _sbrk -> printf -> malloc -> _sbrk ...
-  Log("BRRK CALLLLLLLED");
-  // return (void *)-1;
-  if(navy_brk == NULL){
-    navy_brk = &end;
-  }
-  if(0 == _syscall_(SYS_brk, navy_brk+increment, 0, 0)) { // if allocate allowed by system
+  // Log("BRRK CALLLLLLLED");
+  return (void *)-1;
+  // if(navy_brk == NULL){
+  //   navy_brk = &end;
+  // }
+  __intptr_t new_brk = navy_brk+increment;
+  if(0 == _syscall_(SYS_brk, new_brk, 0, 0)) { // if allocate allowed by system
     uintptr_t old_brk = navy_brk;
     navy_brk += increment; //update navy_brk
-    return old_brk;
+    return (void *)old_brk;
   }
   else return (void *)-1;
 }
 
 int _read(int fd, void *buf, size_t count) {
-  _exit(SYS_read);
-  return 0;
+  return _syscall_(SYS_read, fd, (intptr_t)buf, count);
+}
 }
 
 int _close(int fd) {
-  _exit(SYS_close);
-  return 0;
+  return _syscall_(SYS_close, fd, 0,0);
 }
 
 off_t _lseek(int fd, off_t offset, int whence) {

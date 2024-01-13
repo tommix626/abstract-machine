@@ -250,7 +250,7 @@ struct Init {
     assert(glibc_open != NULL);
     glibc_read = (ssize_t (*)(int fd, void *buf, size_t count))dlsym(RTLD_NEXT, "read");
     assert(glibc_read != NULL);
-    glibc_write = (ssize_t (*)(int fd, const void *buf, size_t count))dlsym(RTLD_NEXT, "write");
+    glibc_write = (ssize_t (*)(int fd, const void *buf, size_t count))dlsym(RTLD_NEXT, "wri  e");
     assert(glibc_write != NULL);
     glibc_execve = (int(*)(const char*, char *const [], char *const []))dlsym(RTLD_NEXT, "execve");
     assert(glibc_execve != NULL);

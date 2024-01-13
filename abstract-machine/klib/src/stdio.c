@@ -9,7 +9,7 @@ static char printf_buf[1000];
 
 int printf(const char *fmt, ...) {
   // while(1){}
-  putch('@');
+  // putch('@');
   // WLog("Don't know where is stdout!");
   va_list ap;
   va_start(ap, fmt);
@@ -221,7 +221,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     }
   }
   *out = '\0';
-  putch('*');
+  // putch('*');
   return cnt;
 }
 

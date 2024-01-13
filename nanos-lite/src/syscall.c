@@ -72,9 +72,9 @@ uintptr_t sys_yield(){
 static uintptr_t *nanos_brk;
 uintptr_t sys_brk(uintptr_t addr){
   #ifdef CONFIG_STRACE 
-  Log("do_syscall update brk!");
+  Log("do_syscall update brk to addr=%#x!",addr);
   #endif
-  *nanos_brk = addr;
+  nanos_brk = (uintptr_t *) addr;
   return 0;
 }
 

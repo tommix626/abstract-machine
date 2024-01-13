@@ -82,8 +82,8 @@ static uintptr_t navy_brk = (__intptr_t) &_end;
 
 void *_sbrk(intptr_t increment) { //do not invoke Log/printf here, or else cause dead recursion: _sbrk -> printf -> malloc -> _sbrk ...
   // Log("BRRK CALLLLLLLED");
-  while(1) putch('$');
-  return (void *)-1;
+  // while(1) {}
+  // return (void *)-1;
   // if(navy_brk == NULL){
   //   navy_brk = &end;
   // }

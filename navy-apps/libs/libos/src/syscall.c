@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <time.h>
 #include "syscall.h"
-
 // helper macros
 #define _concat(x, y) x ## y
 #define concat(x, y) _concat(x, y)
@@ -59,25 +58,31 @@ intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
 }
 
 void _exit(int status) {
+  // Log("_exit called!\n");
   _syscall_(SYS_exit, status, 0, 0);
   while (1);
 }
 
 int _open(const char *path, int flags, mode_t mode) {
+  //  Log("_open called!\n");
   // _exit(SYS_open);
   return _syscall_(SYS_open, (intptr_t)path, flags, mode);
 }
 
+
 int _write(int fd, void *buf, size_t count) {
+  //  Log("_write called!\n");
   // _exit(SYS_write); //TODO: change to syscall accordingly with arg sequence
-  return _syscall_(SYS_write, fd, (intptr_t)buf, count);
+  return _syscall_(SYS_write, fd, (const intptr_t)buf, count);
 }
 
 
 extern char _end;
 static uintptr_t navy_brk = (__intptr_t) &_end;
+
 void *_sbrk(intptr_t increment) { //do not invoke Log/printf here, or else cause dead recursion: _sbrk -> printf -> malloc -> _sbrk ...
   // Log("BRRK CALLLLLLLED");
+  while(1) putch('$');
   return (void *)-1;
   // if(navy_brk == NULL){
   //   navy_brk = &end;
@@ -94,15 +99,13 @@ void *_sbrk(intptr_t increment) { //do not invoke Log/printf here, or else cause
 int _read(int fd, void *buf, size_t count) {
   return _syscall_(SYS_read, fd, (intptr_t)buf, count);
 }
-}
 
 int _close(int fd) {
   return _syscall_(SYS_close, fd, 0,0);
 }
 
 off_t _lseek(int fd, off_t offset, int whence) {
-  _exit(SYS_lseek);
-  return 0;
+  return _syscall_(SYS_lseek, fd, offset,whence);
 }
 
 int _gettimeofday(struct timeval *tv, struct timezone *tz) {

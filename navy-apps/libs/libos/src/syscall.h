@@ -1,6 +1,8 @@
 #ifndef __SYSCALL_H__
 #define __SYSCALL_H__
 
+
+
 enum {
   SYS_exit,
   SYS_yield,
@@ -23,6 +25,5 @@ enum {
   SYS_times,
   SYS_gettimeofday
 };
-
 
 #endif

@@ -81,7 +81,7 @@ size_t ramdisk_read(void *buf, size_t offset, size_t len);
 //REwriting using fs_open, fs_read/write
 static uint32_t load_elf(int fd) {
     Elf_Ehdr header;
-    int read_offset = fs_read(fd,&header,sizeof(Elf_Ehdr));
+    fs_read(fd,&header,sizeof(Elf_Ehdr));
     // Verify ELF Magic Number
     assert(
     header.e_ident[0] == 0x7F &&
@@ -95,8 +95,14 @@ static uint32_t load_elf(int fd) {
     for (int i = 0; i < header.e_phnum; i++) {
       fs_read(fd,&phdr,sizeof(Elf_Phdr));
       if(phdr.p_type == 1){ //1 stands for loading.
-        Log("copying (%#x,%#x) to %p",phdr.p_offset,phdr.p_offset+phdr.p_filesz,(void *)phdr.p_vaddr);
+        Log("copying file offset (%#x,%#x) to %p",phdr.p_offset,phdr.p_offset+phdr.p_filesz,(void *)phdr.p_vaddr);
         ramdisk_read((void *)phdr.p_vaddr,phdr.p_offset,phdr.p_filesz); //FIXME TODO: do we need to change this to fs_read? doesn't make sense.
+        size_t old_addr = fs_lseek(fd,0,SEEK_CUR);
+        fs_lseek(fd,phdr.p_offset,SEEK_SET);
+        fs_read(fd,(void *)phdr.p_vaddr,phdr.p_filesz);
+        
+        fs_lseek(fd,old_addr,SEEK_SET);
+        
         Log("cleaning margin amount:%u-%u\n",phdr.p_memsz,phdr.p_filesz);
         memset((void *)phdr.p_vaddr+phdr.p_filesz,0,phdr.p_memsz-phdr.p_filesz);
       }

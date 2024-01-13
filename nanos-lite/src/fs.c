@@ -1,4 +1,5 @@
 #include <fs.h>
+// #include <unistd.h>
 
 typedef size_t (*ReadFn) (void *buf, size_t offset, size_t len);
 typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
@@ -37,16 +38,62 @@ void init_fs() {
 }
 
 int fs_open(const char *pathname, int flags, int mode){
-  return open(pathname,flags,mode);
+  for (size_t fd = 0; fd < sizeof(file_table) / sizeof(file_table[0]); fd++)
+  {
+    if(strcmp(file_table[fd].name,pathname)==0) {
+      file_table[fd].open_offset = 0; //restore open offset
+      Log("open fd=%d",fd);
+      return fd;
+    }
+  }
+  Log("pahtname incorrect or file not updated in ramdisk");
+  assert(0);
 }
+
+size_t ramdisk_read(void *buf, size_t offset, size_t len);
+size_t ramdisk_write(const void *buf, size_t offset, size_t len);
+
 size_t fs_read(int fd, void *buf, size_t len){
-  return read(fd,buf,len);
+  if(fd == 0 || fd == 1 || fd == 2) {//stdin/stout/stderr
+    return 0; //ignored
+  }
+  size_t read_offset = file_table[fd].disk_offset + file_table[fd].open_offset;
+  if(file_table[fd].open_offset+len>file_table[fd].size) {
+    len = file_table[fd].size - file_table[fd].open_offset; //read till EOF
+  }
+  ramdisk_read(buf,read_offset,len);
+  file_table[fd].open_offset += len;
+  return len;
 }
 size_t fs_write(int fd, const void *buf, size_t len){
-  return write(fd,buf,len);
+  assert(fd>2);
+  size_t wr_offset = file_table[fd].disk_offset + file_table[fd].open_offset;
+  if(file_table[fd].open_offset+len>file_table[fd].size) {
+    len = file_table[fd].size - file_table[fd].open_offset; //write till EOF
+  }
+  ramdisk_write(buf,wr_offset,len);
+  file_table[fd].open_offset += len;
+  return len;
 }
 
 
 int fs_close(int fd){
   return 0; //note the open_offset is reset when opening file.
+}
+
+size_t fs_lseek(int fd, int offset, int whence) {
+  if(whence == SEEK_SET) {
+    file_table[fd].open_offset = offset;
+  }
+  else if (whence == SEEK_CUR)
+  {
+    file_table[fd].open_offset += offset;
+  }
+  else if(whence == SEEK_END) {
+    file_table[fd].open_offset = file_table[fd].size + offset; //don't understand why allow go over the boundry TODO FIXME BOOKMARK
+  }
+  else return -1;
+
+  return file_table[fd].open_offset;
+  
 }

@@ -53,6 +53,7 @@ void do_syscall(Context *c) {
     case SYS_open: c->GPRx = sys_open((void*)a[1],a[2],a[3]);break; //open file
     case SYS_read: c->GPRx = sys_read(a[1],(void*)a[2],a[3]);break; //open file
     case SYS_lseek: c->GPRx = sys_lseek(a[1],a[2],a[3]);break;
+    case SYS_close: c->GPRx = 0;break; //close return 0 all the time, for now.
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
 
@@ -81,12 +82,18 @@ uintptr_t sys_brk(uintptr_t addr){
 
 
 uintptr_t sys_open(const char *path, int flags, int mode){
+  #ifdef CONFIG_STRACE 
+  Log("do_syscall dispatch sys_open!");
+  #endif
   return fs_open(path,flags,mode);
 }
 
 extern uint32_t ramdisk_start;
 
 uintptr_t sys_read(int fd, void *buf, size_t len){
+  #ifdef CONFIG_STRACE 
+  Log("do_syscall dispatch sys_read!");
+  #endif
   return fs_read(fd,buf,len);
 
 }
@@ -120,6 +127,9 @@ uintptr_t sys_write(int fd, void *buf, size_t count){
 
 
 uintptr_t sys_lseek(int fd, int offset, int whence) {
+  #ifdef CONFIG_STRACE 
+  Log("do_syscall dispatch sys_lseek!");
+  #endif
   return fs_lseek(fd, offset, whence);
 }
 

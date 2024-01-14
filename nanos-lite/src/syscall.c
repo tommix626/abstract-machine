@@ -2,7 +2,10 @@
 #include "syscall.h"
 #include <fs.h> 
 
-#define CONFIG_STRACE 1
+#include <sys/time.h>
+#include <time.h>
+
+// #define CONFIG_STRACE 1
 
 // enum { //from navy-apps/libs/libos/src/syscall.h
 //   SYS_exit = 0,
@@ -35,6 +38,9 @@ uintptr_t sys_write(int fd, void *buf, size_t count); //count is len.
 uintptr_t sys_open(const char *path, int flags, int mode);
 uintptr_t sys_read(int fd, void *buf, size_t len);
 uintptr_t sys_lseek(int fd, int offset, int whence);
+uintptr_t sys_gettimeofday(struct timeval *tv, struct timezone *tz);
+
+
 void do_syscall(Context *c) {
   #ifdef CONFIG_STRACE
   Log("STrace:syscall type=%d, arg= %d, %d, %d.",c->GPR1,c->GPR2,c->GPR3,c->GPR4);
@@ -54,6 +60,7 @@ void do_syscall(Context *c) {
     case SYS_read: c->GPRx = sys_read(a[1],(void*)a[2],a[3]);break; //open file
     case SYS_lseek: c->GPRx = sys_lseek(a[1],a[2],a[3]);break;
     case SYS_close: c->GPRx = 0;break; //close return 0 all the time, for now.
+    case SYS_gettimeofday: c->GPRx = sys_gettimeofday((void*)a[1],(void*)a[2]);break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
 
@@ -122,3 +129,12 @@ uintptr_t sys_lseek(int fd, int offset, int whence) {
 }
 
 
+#include <klib-macros.h>
+
+uintptr_t sys_gettimeofday(struct timeval *tv, struct timezone *tz)
+{
+  size_t us = io_read(AM_TIMER_UPTIME).us;
+  tv->tv_sec = us / 1000000;
+  tv->tv_usec = us - us / 1000000 * 1000000;
+  return 0;
+}

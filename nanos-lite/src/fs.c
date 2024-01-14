@@ -25,19 +25,33 @@ size_t invalid_write(const void *buf, size_t offset, size_t len) {
   return 0;
 }
 
-
+//nanos-lite/src/device.c
 size_t serial_write(const void *buf, size_t offset, size_t len);
+size_t events_read(void *buf, size_t offset, size_t len);
+size_t dispinfo_read(void *buf, size_t offset, size_t len);
+size_t fb_write(const void *buf, size_t offset, size_t len);
+// void init_device();
 
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
   [FD_STDIN]  = {"stdin", 0, 0, invalid_read, invalid_write},
   [FD_STDOUT] = {"stdout", 0, 0, invalid_read, serial_write},
   [FD_STDERR] = {"stderr", 0, 0, invalid_read, serial_write},
+  [FD_FB] = {"/dev/fb",0,0,invalid_read, fb_write},
 #include "files.h"
+  {"/dev/events", 0, 0,events_read,invalid_write},
+  {"/proc/dispinfo", 0, 0,dispinfo_read,invalid_write},
+  
 };
+
+
 
 void init_fs() {
   // TODO: initialize the size of /dev/fb
+  // init_device(); //ioe_init()
+  AM_GPU_CONFIG_T gpu_conf = io_read(AM_GPU_CONFIG);
+  file_table[FD_FB].size = gpu_conf.width * gpu_conf.height;
+  
 }
 
 int fs_open(const char *pathname, int flags, int mode){
@@ -49,7 +63,7 @@ int fs_open(const char *pathname, int flags, int mode){
       return fd;
     }
   }
-  Log("pathname incorrect or file not updated in ramdisk");
+  Log("pathname incorrect or file not updated in ramdisk, pathname = %s",pathname);
   assert(0);
 }
 
@@ -57,8 +71,9 @@ size_t ramdisk_read(void *buf, size_t offset, size_t len);
 size_t ramdisk_write(const void *buf, size_t offset, size_t len);
 
 size_t fs_read(int fd, void *buf, size_t len){
-  if(fd == 0 || fd == 1 || fd == 2) {//stdin/stout/stderr
-    return 0; //ignored
+  assert(fd>2);//ignore std stream
+  if(file_table[fd].write!=NULL) {
+    return file_table[fd].read(buf, 0, len);
   }
   size_t read_offset = file_table[fd].disk_offset + file_table[fd].open_offset;
   if(file_table[fd].open_offset+len>file_table[fd].size) {

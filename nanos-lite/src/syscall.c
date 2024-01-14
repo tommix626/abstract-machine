@@ -103,20 +103,8 @@ uintptr_t sys_write(int fd, void *buf, size_t count){
   #ifdef CONFIG_STRACE 
   Log("do_syscall call helper method sys_write!");
   #endif
-  if(fd==1 || fd==2){
-    #ifdef CONFIG_STRACE 
-    Log("sys_write:write to STDOUT/STDERR");
-    #endif
-    
-    for (size_t i = 0; i < count; i++)
-    {
-      putch(*(char*)buf++);
-    }
-    return count;
-  }
-  else if(fd == 0) {
-    return 0; //ignore stdin
-  }
+
+  assert(fd!=0); //cannot write to stdin
   assert(count>0); //man 2 write for count=0 case, not implemented yet.
   /** peusdocode
    * 1. check fd (which arg) is 1/2 -> putch(stdout, stderr[?]) [man 2 write/man syscalls/man syscall]

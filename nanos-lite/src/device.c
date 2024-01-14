@@ -14,8 +14,18 @@ static const char *keyname[256] __attribute__((used)) = {
   AM_KEYS(NAME)
 };
 
+
+#define CONFIG_STRACE 1
+
 size_t serial_write(const void *buf, size_t offset, size_t len) {
-  return 0;
+  #ifdef CONFIG_STRACE
+  Log("serial_write:write to STDOUT/STDERR");
+  #endif
+  for (size_t i = 0; i < len; i++)
+    {
+      putch(*(char*)buf++);
+    }
+  return len;
 }
 
 size_t events_read(void *buf, size_t offset, size_t len) {

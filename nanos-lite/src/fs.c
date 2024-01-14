@@ -25,11 +25,14 @@ size_t invalid_write(const void *buf, size_t offset, size_t len) {
   return 0;
 }
 
+
+size_t serial_write(const void *buf, size_t offset, size_t len);
+
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
   [FD_STDIN]  = {"stdin", 0, 0, invalid_read, invalid_write},
-  [FD_STDOUT] = {"stdout", 0, 0, invalid_read, invalid_write},
-  [FD_STDERR] = {"stderr", 0, 0, invalid_read, invalid_write},
+  [FD_STDOUT] = {"stdout", 0, 0, invalid_read, serial_write},
+  [FD_STDERR] = {"stderr", 0, 0, invalid_read, serial_write},
 #include "files.h"
 };
 
@@ -42,11 +45,11 @@ int fs_open(const char *pathname, int flags, int mode){
   {
     if(strcmp(file_table[fd].name,pathname)==0) {
       file_table[fd].open_offset = 0; //restore open offset
-      Log("open fd=%d",fd);
+      Log("open fd=%d filename=%s",fd, file_table[fd].name);
       return fd;
     }
   }
-  Log("pahtname incorrect or file not updated in ramdisk");
+  Log("pathname incorrect or file not updated in ramdisk");
   assert(0);
 }
 
@@ -66,14 +69,19 @@ size_t fs_read(int fd, void *buf, size_t len){
   return len;
 }
 size_t fs_write(int fd, const void *buf, size_t len){
-  assert(fd>2);
-  size_t wr_offset = file_table[fd].disk_offset + file_table[fd].open_offset;
-  if(file_table[fd].open_offset+len>file_table[fd].size) {
-    len = file_table[fd].size - file_table[fd].open_offset; //write till EOF
+  // assert(fd>2); //NOT needed as we have VFS.
+  
+  if(file_table[fd].write==NULL) {
+    size_t wr_offset = file_table[fd].disk_offset + file_table[fd].open_offset;
+    if(file_table[fd].open_offset+len>file_table[fd].size) {
+      len = file_table[fd].size - file_table[fd].open_offset; //write till EOF
+    }
+    ramdisk_write(buf,wr_offset,len);
+    file_table[fd].open_offset += len;
+    return len;
   }
-  ramdisk_write(buf,wr_offset,len);
-  file_table[fd].open_offset += len;
-  return len;
+  else return file_table[fd].write(buf,file_table[fd].open_offset,len); //invoke the WriteFn if not NULL:
+  
 }
 
 

@@ -29,7 +29,7 @@ extern unsigned char isa_logo[];
 void init_isa();
 
 // reg
-extern CPU_state cpu; //NOTE:extern meaning cpu is defined elsewhere, so this is like receiving the cpu reference from another file. (nemu/src/cpu/cpu-exec.c:28~)
+extern CPU_state cpu; //NOTE: extern meaning cpu is defined elsewhere, so this is like receiving the cpu reference from another file. (nemu/src/cpu/cpu-exec.c:28~)
 void isa_reg_display();
 word_t isa_reg_str2val(const char *name, bool *success);
 

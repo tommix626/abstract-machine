@@ -41,11 +41,11 @@ static void serial_io_handler(uint32_t offset, int len, bool is_write) {
 }
 
 void init_serial() {
-  serial_base = new_space(8);
+  serial_base = new_space(8); //NOTE: doesn't care where the host-machine address is. this is used to modify data with offset. The physical address location is determined by map.low.
 #ifdef CONFIG_HAS_PORT_IO
   add_pio_map ("serial", CONFIG_SERIAL_PORT, serial_base, 8, serial_io_handler);
 #else
-  add_mmio_map("serial", CONFIG_SERIAL_MMIO, serial_base, 8, serial_io_handler);
+  add_mmio_map("serial", CONFIG_SERIAL_MMIO, serial_base, 8, serial_io_handler); //NOTE: doesn't need to record anything here, as long as map was register with callback, everything works on its own.
 #endif
 
 }

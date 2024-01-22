@@ -4,10 +4,15 @@
 
 static Context* (*user_handler)(Event, Context*) = NULL;
 
+//fillout the Context PTR c (the only handler?)
 Context* __am_irq_handle(Context *c) {
+  // printf("mcause=%d,mstatus=%d ,mepc=%d \n", c->mcause, c->mstatus, c->mepc); //DEBUG NOTE: cannot use %#x, since my klib doesn't support it.
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
+      case -1: ev.event = EVENT_YIELD; break;
+      case 0 ... 19: ev.event = EVENT_SYSCALL; break; // 0:SYS_exit; 1: SYS_yield... called by user-level program. defined: navy-apps/libs/libos/src/syscall.h
+      
       default: ev.event = EVENT_ERROR; break;
     }
 
@@ -18,11 +23,11 @@ Context* __am_irq_handle(Context *c) {
   return c;
 }
 
-extern void __am_asm_trap(void);
+extern void __am_asm_trap(void); //NOTE: mtvec addr will be passed to csrw instruction in cte_init below
 
 bool cte_init(Context*(*handler)(Event, Context*)) {
   // initialize exception entry
-  asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
+  asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap)); // NOTE: %0 placeholder for __am_asm_trap, which should store the addr of error handle entry addr.
 
   // register event handler
   user_handler = handler;
@@ -35,10 +40,15 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
 }
 
 void yield() {
+  
+// printf("TETETET\n");
 #ifdef __riscv_e
   asm volatile("li a5, -1; ecall");
+  
 #else
+
   asm volatile("li a7, -1; ecall");
+  
 #endif
 }
 

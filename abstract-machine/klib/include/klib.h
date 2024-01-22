@@ -9,9 +9,10 @@
 extern "C" {
 #endif
 
-//#define __NATIVE_USE_KLIB__
+// #define __NATIVE_USE_KLIB__ //comment if want to use native "correct" version
 
 // string.h
+
 void  *memset    (void *s, int c, size_t n);
 void  *memcpy    (void *dst, const void *src, size_t n);
 void  *memmove   (void *dst, const void *src, size_t n);
@@ -47,7 +48,7 @@ int    vsnprintf (char *str, size_t size, const char *format, va_list ap);
       if (!(cond)) { \
         printf("Assertion fail at %s:%d\n", __FILE__, __LINE__); \
         halt(1); \
-      } \
+      }\
     } while (0)
 #endif
 

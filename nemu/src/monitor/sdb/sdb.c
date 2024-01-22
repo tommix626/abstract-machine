@@ -19,7 +19,7 @@
 #include <readline/history.h>
 #include <monitor/sdb.h>
 #include <monitor/watchpoint.h> // for watchpoint
-
+#include <monitor/iringbuf.h> // for iringbuf
 
 #include <memory/paddr.h>
 // #include<common.h> //used for word_t !already imported in sdb.h
@@ -29,6 +29,7 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+void iringbuf_init();
 
 /* We use the `readline` library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -180,7 +181,7 @@ static int cmd_x(char *args) {
 }
 
 static int cmd_p(char *args) {
-  if (*args == '\0' || args == NULL) {
+  if (args == NULL || *args == '\0') {
     /* no argument given */
     printf("Missing argument. usage: p [EXPR] \n");
     return 0;
@@ -203,7 +204,7 @@ static int cmd_p(char *args) {
 /// @param args EXPR
 ///             N - number to 4-byte to be evaluate
 static int cmd_w(char *args) {
-  if (*args == '\0' || args == NULL) {
+  if (args == NULL || *args == '\0') {
     /* no argument given */
     printf("Missing argument. usage: w [EXPR] \n");
     return 0;
@@ -226,7 +227,7 @@ static int cmd_w(char *args) {
 }
 
 static int cmd_d(char *args) {
-  if (*args == '\0' || args == NULL) {
+  if (args == NULL || *args == '\0') {
     /* no argument given */
     printf("Missing argument. usage: d [Watchpoint_Number] \n");
     return 0;
@@ -339,4 +340,7 @@ void init_sdb() {
 
   /* Initialize the watchpoint pool. */
   init_wp_pool();
+
+  /* init iringbuf*/
+  IFDEF(CONFIG_ITRACE, iringbuf_init());
 }

@@ -50,3 +50,126 @@ The following subprojects/components are included. Some of them are not fully im
     - understand Kconfig and modify: `nemu/Kconfig`
     - set up config entry for watchpoint function and debug output;
     - change setting by running `make menuconfig` in `nemu/`.
+
+
+# PA2 RISC-V bare-metal
+## pa2.1 implement all RISC-V instruction set: include `RV32I` and `RV32M`
+- nemu/src/isa/riscv32/inst.c
+- ### Read through risc-V inst set and implement every instruction:
+    - support integer arithmetic through I and R instruction decoding.
+    - support memory load and store through I/U and S instrucion decoding.
+    - support jumping and branching through B and J/I instrucion decoding.
+- ### Run a bunch of simple C program's object file through nemu and pass.
+    - tests located in `am-kernels/tests/cpu-tests/tests`, and can be run though command: `make ARCH=riscv32-nemu ALL={test program without .c suffix} run`
+- ### Abstract-machine lib function
+    - look through man pages and implement string functions: `strlen`, `strcpy`, `strncpy`, `strcat`, `strcmp`, `strncmp`; (`abstract-machine/klib/src/string.c`)
+    - memory functions: `memset`, `memmove`, `memcmp`, `memcpy`; (`abstract-machine/klib/src/string.c`)
+    - print functions: `sprintf`,`vsprintf`,`snprintf`,`vsnprintf`. (`abstract-machine/klib/src/stdio.c`)
+
+## pa2.2 tracing (Infrastructure part 2)
+- ### set up Instruction Ring Buffer and integrate into sdb:
+    - nemu/src/monitor/sdb/iringbuf.c
+    - nemu/include/monitor/iringbuf.h
+- ### add Memory Trace function and enabling control through Kconfig:
+    - nemu/src/memory/paddr.c
+    - nemu/Kconfig
+- ### add Function Tracing:
+    - **add `-e` argument to main to parse elf file, modify makefile to load elf file**
+        - abstract-machine/scripts/platform/nemu.mk
+        - nemu/src/monitor/monitor.c
+    - **detect function calling and return with `jal` and `jalr` instruction, and print trace appropiately**
+        - nemu/src/isa/riscv32/inst.c
+    - **modify Kconfig to add option on opening ftrace**
+- ### klib testing:
+    - add folder for klib testing: `am-kernels/tests/klib-tests`.
+    - write testsuite for klib functions, and test on native. 
+        - am-kernels/tests/klib-tests/src/tests/test_memory.c
+        - am-kernels/tests/klib-tests/src/tests/test_string.c
+        - am-kernels/tests/klib-tests/src/tests/test_printf.c
+        - am-kernels/tests/klib-tests/src/tests/test_test_setup.c
+- ### DIFF test:
+    - nemu/src/isa/riscv32/difftest/dut.c
+    - add differential testing for nemu,comparing with REF spike. Comparing only register each step!
+
+## pa2.3 IO device
+- ### read source code, fix bug in printf when invoking nemu putch.
+- ### implement timer device. Understand AM abstraction level better.
+    - run benchmark at `/home/tom/ics2023/am-kernels/benchmarks`, get score ~200 / 100000 Marks (i9-9900K @ 3.60GHz)
+- ### dtrace. tracing of device access. (with Kconfig)
+- ### keyboard device. Record and detect make code and break code.
+    - abstract-machine/am/src/platform/nemu/ioe/input.c
+    - nemu/src/device/keyboard.c
+- ### VGA: implement VGA display IOE
+    - NEMU part, include registering this device and register read write behaviors and maps: `nemu/src/device/vga.c`
+    - AM part, include drawing rect and syncing through io_read/io_write: `abstract-machine/am/src/platform/nemu/ioe/gpu.c`
+- ### Run NEMU on NEMU
+    - Fix Bug
+    - Turing Complete, use the following command to run NEMU(no image) on NEMU, or run SNAKE on NEMU on NEMU... (Very Slow!)
+    - make ARCH=riscv32-nemu mainargs=/home/<_username_>/ics2023/am-kernels/kernels/snake/build/snake-riscv32-nemu.bin
+
+# PA3 Operating System
+## pa3.1 Error Handling and OS context change.
+- ### Hardware level: implement privileged instruction set `RV32-Zicsr` extension along CSR hardware.
+    - Implement the CSR registers in NEMU and `raise_intr` function for `ecall`.
+    - implement atomic read/write csr instructions: `csrrw`,`csrrs`,`csrrc`,`csrrwi`,`csrrsi`,`csrrci`,`ecall`,`mret`.
+    - nemu/src/isa/riscv32/inst.c
+    - pass yield test: `~/ics2023/am-kernels/tests/am-tests$ make ARCH=riscv32-nemu mainargs=i run`
+
+- ### Software level: AM save/restore Context, Event handling
+    - save/restore context in `abstract-machine/am/src/riscv/nemu/trap.S`
+        - note this is the OS define routine. Also: it should be adding 34 to the mepc CSR to avoid caughtup infinitely at `ecall`.
+    - handling event in `abstract-machine/am/src/riscv/nemu/cte.c:__am_irq_handle`, called by `trap.S`.
+    - the journey:
+        - start with client software program calling yield,
+        - in assembly code, its doing ecall.
+        - our NEMU hardware translate this instruction to storing CSR and jump PC to `mtvec` (`nemu/src/isa/riscv32/system/intr.c:isa_raise_intr`)
+        - the code at mtvec is AM(OS) defined (`abstract-machine/am/src/riscv/nemu/trap.S:__am_asm_trap`), which store context, and handle events by calling `abstract-machine/am/src/riscv/nemu/cte.c:__am_irq_handle`, and restore context, then `mret`.
+        - `mret` , translated by NEMU: restore pc to CSR mepc, and continue program going on "user level". (returning control from OS)
+
+- ### etrace: Exception Tracing
+    - nemu/Kconfig
+    - nemu/src/isa/riscv32/system/intr.c
+
+## pa3.2 User Program and Syscall.
+- ### setting up nanos-lite, simple OS.
+    - fix instruction bug on yield. change mcause to store a7 register.
+    - handled YIELD event.
+- ### program loader.
+    - load program that is Cmake into ramdisk.img
+    - read ELF file, extract segments, and memset/copy to virtual locations: 0x83000000.
+    - nanos-lite/src/loader.c
+- ### _syscall_ upper level API
+    - implement syscall function on nanos level, used by navy.
+        - SYS_yield: handle yield event initiated by user program
+        - SYS_exit: exiting program, signify OS to change program.
+        - SYS_read, SYS_write (_read,_write): read and write from ramdisk.
+        - SYS_brk (_sbrk): set up sbrk for heap management, for malloc/free.
+    - strace: trace the syscall.
+- ### File System
+    - #### Simple File System
+        - update loader to handled loading by filename.
+        - update syscall (open,read,write) to support fd argument, by calling:
+            - fs_open, fs_close
+            - fs_read, fs_write
+            - fs_lseek
+    - ### Virtual File System (IOE as files)
+        - update fs_read and fs_write by implementing special read write functions for the virtual files.
+        - implement serial output as file write.
+        - implement gettimeofday as file read. (and implement the navy:NDL_GetTicks)
+        - impelment keyboard info as file read.
+        - impelment VGA display info as file read.
+        - impelment VGA display as file write.
+ 
+NOTE: nanos user call syscall by calling ecall with param, the irq classify it as syscall event and hand to do_syscall, do_syscall (OS) delegate to am-yield, am yield do ecall/mtvec/... use do_event handler and return a value. do_syscall store the return val and hand it back to user
+
+## pa3.3 More interesting User Program.
+
+- ### implement fixedpt to simulate float number algebra without the float number riscv extension. (fixedptc.h)
+
+- ### SDL:  (navy-apps/libs/libminiSDL/)[https://www.libsdl.org/release/SDL-1.2.15/docs/]
+    - implement the SDL\_updateRect function, upper level API update an area to VGA. (NSlider)
+    - SDL\_FillRect(),SDL\_BlitSurface(): GPU basic ability on VGA.(MENU)
+    - SDL\_GetTicks(): calling NDL function.
+    - SDL\_WaitEvent, SDL\_PollEvent(): wait or poll an event, that is keyboard or user defined.(NTerm)
+    - IMG\_Load: Load Image (Flappy bird)
+

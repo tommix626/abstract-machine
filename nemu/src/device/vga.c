@@ -74,11 +74,16 @@ static inline void update_screen() {
 void vga_update_screen() {
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
+  if(vgactl_port_base[1]!=0){
+    update_screen();
+    // printf("updated!\n"); //DEBUG
+  }
+
 }
 
 void init_vga() {
   vgactl_port_base = (uint32_t *)new_space(8);
-  vgactl_port_base[0] = (screen_width() << 16) | screen_height();
+  vgactl_port_base[0] = (screen_width() << 16) | screen_height(); //NOTE: how screen wh is stored in nemu.
 #ifdef CONFIG_HAS_PORT_IO
   add_pio_map ("vgactl", CONFIG_VGA_CTL_PORT, vgactl_port_base, 8, NULL);
 #else
@@ -86,7 +91,10 @@ void init_vga() {
 #endif
 
   vmem = new_space(screen_size());
-  add_mmio_map("vmem", CONFIG_FB_ADDR, vmem, screen_size(), NULL);
+
+  // callback not needed: see how pdate is handled by vga_update_screen.
+  add_mmio_map("vmem", CONFIG_FB_ADDR, vmem, screen_size(), NULL); // add custom handler. NOTE: CONFIG_FB_ADDR is the FB_ADDR in AM (nemu.h) NOTNEEDED
+
   IFDEF(CONFIG_VGA_SHOW_SCREEN, init_screen());
   IFDEF(CONFIG_VGA_SHOW_SCREEN, memset(vmem, 0, screen_size()));
 }

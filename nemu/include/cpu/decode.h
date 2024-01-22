@@ -40,7 +40,7 @@ static inline void pattern_decode(const char *str, int len,
           "invalid character '%c' in pattern string", c); \
       __key  = (__key  << 1) | (c == '1' ? 1 : 0); \
       __mask = (__mask << 1) | (c == '?' ? 0 : 1); \
-      __shift = (c == '?' ? __shift + 1 : 0);  //so neat! \
+      __shift = (c == '?' ? __shift + 1 : 0);  /*so neat!*/ \
     } \
   }
 
@@ -91,7 +91,8 @@ finish:
   uint64_t key, mask, shift; \
   pattern_decode(pattern, STRLEN(pattern), &key, &mask, &shift); \
   if ((((uint64_t)INSTPAT_INST(s) >> shift) & mask) == key) { \
-    INSTPAT_MATCH(s, ##__VA_ARGS__); \
+    /*DLog("%#x match pattern:%s DECODES: key=%#x mask=%#x shift=%#x",INSTPAT_INST(s), pattern, (int)key, (int)mask, (int)shift); debug info*/ \
+    INSTPAT_MATCH(s, ##__VA_ARGS__); /*decode operand*/  \
     goto *(__instpat_end); \
   } \
 } while (0)

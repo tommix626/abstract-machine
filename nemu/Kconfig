@@ -143,14 +143,43 @@ config TRACE_END
 
 config ITRACE
   depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
-  bool "Enable instruction tracer"
+  bool "ITRACE: Enable instruction tracer"
   default y
 
 config ITRACE_COND
   depends on ITRACE
-  string "Only trace instructions when the condition is true"
-  default "true"
+  bool "Only trace instructions when the condition is true"
+  default n
 
+config MTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "MTRACE: Enable memory read write tracer"
+  default y
+
+config MTRACE_COND
+  depends on MTRACE
+  bool "Only trace memory when the condition is true"
+  default n
+
+config FTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "FTRACE: Enable function call return tracer"
+  default n
+
+config DTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "DTRACE: Enable device access tracer"
+  default y
+
+config ETRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "ETRACE: Enable exception tracer"
+  default y
+
+config STRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "STRACE: Enable syscall tracer,(nanos-lite)WARNING:NOT EFFECTIVE, change at: nanos-lite/src/syscall.c manually"
+  default y
 
 config DIFFTEST
   depends on TARGET_NATIVE_ELF

@@ -18,7 +18,8 @@
 
 #include <common.h>
 
-//change type of addr to `(uintXX_t *`), and then apply `*` to get value of that addr. 
+// host = real-world computer running nemu.
+//change type of addr to `(uintXX_t *`), and then apply system `*` to get value of that addr. 
 //need vm addr of the real machine.
 static inline word_t host_read(void *addr, int len) {
   switch (len) {

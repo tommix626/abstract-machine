@@ -22,6 +22,8 @@
 typedef struct {
   word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
   vaddr_t pc;
+  //CSR
+  word_t CSR[4096]; //mtvec:0x305  mepc:0x341  mcause:0x342  mstatus:0x300
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
 
 // decode
@@ -32,5 +34,12 @@ typedef struct {
 } MUXDEF(CONFIG_RV64, riscv64_ISADecodeInfo, riscv32_ISADecodeInfo);
 
 #define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
+
+
+//CSR name alias
+#define CSR_MTVEC 0x305
+#define CSR_MEPC 0x341
+#define CSR_MCAUSE 0x342
+#define CSR_MSTATUS 0x300
 
 #endif

@@ -44,7 +44,7 @@ const int get_reg_id_by_name(const char * s){
 /// @param success 
 /// @return 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  int reg_id = get_reg_id_by_name(s+1);
+  int reg_id = get_reg_id_by_name(s);
   if(reg_id == -1){
     WLog("invalid reg name");
     *success = false;

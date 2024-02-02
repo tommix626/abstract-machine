@@ -3,16 +3,77 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
+  SDL_Rect targetrect;
+  
+  int target_x = 0;
+  int target_y = 0;
+  int target_w = 0;
+  int target_h = 0;
+
+  if(srcrect==NULL) {
+    target_x = 0;
+    target_y = 0;
+    target_w = src->w;
+    target_h = src->h;
+  }
+  else{
+    target_x = srcrect->x;
+    target_y = srcrect->y;
+    target_w = srcrect->w;
+    target_h = srcrect->h;
+  }
+  //copy targetrect(x,y,w,h) to dstrect(x,y)
+  for (size_t l = 0; l < target_h; l++)
+  {
+    int doffset = dstrect->x * 4 + (dstrect->y+l) * dst->pitch;
+    int soffset = target_x * 4 + (target_y+l) * src->pitch;
+    memmove(dst->pixels+doffset,src->pixels+soffset,4*target_w);
+  }
+
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
+  uint32_t color_line[1000];
+
+  if(dstrect ==  NULL) {
+    for (size_t i = 0; i < dst->w; i++)
+    {
+      color_line[i] = color;
+    }
+    for (size_t line = 0; line < dst->h; line++)
+      {
+        int offset = (line) * dst->pitch;
+        memmove(dst->pixels+offset,color_line,4*dst->w); // color is 32-bit, not 8-bit char.
+      }
+  }
+  else {
+    for (size_t i = 0; i < dstrect->w; i++)
+    {
+      color_line[i] = color;
+    }
+    for (size_t line = 0; line < dstrect->h; line++)
+      {
+        int offset = dstrect->x + (dstrect->y+line) * dst->pitch;
+        // memset(dst->pixels+offset,color,dstrect->w);
+        memmove(dst->pixels+offset,color_line,4*dstrect->w);
+      }
+  }
+  
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
+  // printf("SDL:DRAW RECT x=%d y=%d;w=%d h=%d\n",x,y,w,h);
+  if(x || y || w || h) {
+  NDL_DrawRect(s->pixels,x,y,w,h);
+  }
+  else {
+    NDL_DrawRect(s->pixels,0,0,s->w,s->h);
+  }
 }
 
 // APIs below are already implemented.
@@ -57,9 +118,9 @@ SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int dep
   s->w = width;
   s->h = height;
   s->pitch = width * depth / 8;
-  assert(s->pitch == width * s->format->BytesPerPixel);
+  assert(s->pitch == width * s->format->BytesPerPixel); //NOTE: pitch is the data length of a line
 
-  if (!(flags & SDL_PREALLOC)) {
+  if (!(flags & SDL_PREALLOC)) { //NOTE: second bit of flag indicate whether we should initialize pixels's memory on heap.
     s->pixels = malloc(s->pitch * height);
     assert(s->pixels);
   }
@@ -72,7 +133,7 @@ SDL_Surface* SDL_CreateRGBSurfaceFrom(void *pixels, int width, int height, int d
   SDL_Surface *s = SDL_CreateRGBSurface(SDL_PREALLOC, width, height, depth,
       Rmask, Gmask, Bmask, Amask);
   assert(pitch == s->pitch);
-  s->pixels = pixels;
+  s->pixels = pixels; 
   return s;
 }
 

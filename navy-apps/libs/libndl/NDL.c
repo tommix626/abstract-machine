@@ -27,6 +27,7 @@ uint32_t NDL_GetTicks() {
 
 
 int NDL_PollEvent(char *buf, int len) {
+  memset(buf, 0, len);
   int res = read(fd_kbdevtdev, buf, len);
   // printf("read kbd result=%d\n",res); //DEBUG
   return res;
@@ -111,6 +112,7 @@ void NDL_OpenCanvas(int *w, int *h) {
 }
 
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) { //xywh on canvas
+// printf("NDL:Draw rect: x=%d y=%d;w=%d h=%d\n",x,y,w,h);
   assert(w<=screen_w && h<=screen_h);
 
   for (size_t line = 0; line < h; line++)

@@ -55,17 +55,20 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {
   AM_GPU_CONFIG_T gpu_conf = io_read(AM_GPU_CONFIG);
-  int px_w = offset % gpu_conf.width;
-  int px_h = offset / gpu_conf.width;
-  assert(px_h <= gpu_conf.height);
-  for (size_t i = 0; i < len; i++)
-  {
-    //draw px with ioe
-    io_write(AM_GPU_FBDRAW, px_w, px_h, (void*) buf+i*4, 1, 1, true);
-    //move to next pix
-    px_h += (px_w+1)/ gpu_conf.width;
-    px_w =  (px_w+1)% gpu_conf.width;
-  }
+  int px_x = offset % gpu_conf.width;
+  int px_y = offset / gpu_conf.width;
+  assert(px_y <= gpu_conf.height);
+  assert(px_x + len <= gpu_conf.width); //assume only one line of information
+  io_write(AM_GPU_FBDRAW, px_x, px_y, (void*) buf, len, 1, true);
+  // for (size_t i = 0; i < len; i++)
+  // {
+  //   //draw px with ioe
+    
+  
+  //   //move to next pix
+  //   px_h += (px_w+1)/ gpu_conf.width;
+  //   px_w =  (px_w+1)% gpu_conf.width;
+  // }
   
   return 0;
 }

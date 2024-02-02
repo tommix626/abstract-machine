@@ -138,6 +138,38 @@ The following subprojects/components are included. Some of them are not fully im
     - load program that is Cmake into ramdisk.img
     - read ELF file, extract segments, and memset/copy to virtual locations: 0x83000000.
     - nanos-lite/src/loader.c
+- ### _syscall_ upper level API
+    - implement syscall function on nanos level, used by navy.
+        - SYS_yield: handle yield event initiated by user program
+        - SYS_exit: exiting program, signify OS to change program.
+        - SYS_read, SYS_write (_read,_write): read and write from ramdisk.
+        - SYS_brk (_sbrk): set up sbrk for heap management, for malloc/free.
+    - strace: trace the syscall.
+- ### File System
+    - #### Simple File System
+        - update loader to handled loading by filename.
+        - update syscall (open,read,write) to support fd argument, by calling:
+            - fs_open, fs_close
+            - fs_read, fs_write
+            - fs_lseek
+    - ### Virtual File System (IOE as files)
+        - update fs_read and fs_write by implementing special read write functions for the virtual files.
+        - implement serial output as file write.
+        - implement gettimeofday as file read. (and implement the navy:NDL_GetTicks)
+        - impelment keyboard info as file read.
+        - impelment VGA display info as file read.
+        - impelment VGA display as file write.
+ 
+NOTE: nanos user call syscall by calling ecall with param, the irq classify it as syscall event and hand to do_syscall, do_syscall (OS) delegate to am-yield, am yield do ecall/mtvec/... use do_event handler and return a value. do_syscall store the return val and hand it back to user
 
+## pa3.3 More interesting User Program.
 
-nanos user call syscall by calling ecall with param, the irq classify it as syscall event and hand to do_syscall, do_syscall (OS) delegate to am-yield, am yield do ecall/mtvec/... use do_event handler and return a value. do_syscall store the return val and hand it back to user
+- ### implement fixedpt to simulate float number algebra without the float number riscv extension. (fixedptc.h)
+
+- ### SDL:  (navy-apps/libs/libminiSDL/)[https://www.libsdl.org/release/SDL-1.2.15/docs/]
+    - implement the SDL\_updateRect function, upper level API update an area to VGA. (NSlider)
+    - SDL\_FillRect(),SDL\_BlitSurface(): GPU basic ability on VGA.(MENU)
+    - SDL\_GetTicks(): calling NDL function.
+    - SDL\_WaitEvent, SDL\_PollEvent(): wait or poll an event, that is keyboard or user defined.(NTerm)
+    - IMG\_Load: Load Image (Flappy bird)
+
